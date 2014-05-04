@@ -124,6 +124,20 @@
   <ItemGroup>
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\chessboard-0.3.0.css" />
+    <Content Include="Content\chessboard-0.3.0.min.css" />
+    <Content Include="Content\Images\bB.png" />
+    <Content Include="Content\Images\bK.png" />
+    <Content Include="Content\Images\bN.png" />
+    <Content Include="Content\Images\bP.png" />
+    <Content Include="Content\Images\bQ.png" />
+    <Content Include="Content\Images\bR.png" />
+    <Content Include="Content\Images\wB.png" />
+    <Content Include="Content\Images\wK.png" />
+    <Content Include="Content\Images\wN.png" />
+    <Content Include="Content\Images\wP.png" />
+    <Content Include="Content\Images\wQ.png" />
+    <Content Include="Content\Images\wR.png" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
@@ -131,6 +145,7 @@
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
+    <Content Include="Scripts\chessboard-0.3.0.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />

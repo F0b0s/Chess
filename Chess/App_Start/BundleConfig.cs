@@ -22,7 +22,7 @@ namespace Chess
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
-                      "~/Content/site.css"));
+                      "~/Content/site.css", "~/Content/chessboard-0.3.0.css"));
         }
     }
 }
