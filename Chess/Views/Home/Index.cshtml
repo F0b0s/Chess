@@ -6,32 +6,47 @@
     var id = '';
     $(document).ready(function () {
         $('#analyze').first().click(function () {
-            var board = $('#fen').first();
+            var fen = $('#fen').first();
             var depth = $('#depthSpinner').first();
             var data = {
-                fen: board.text(),
+                fen: fen.text(),
                 depth: depth.spinner('value')
             }
-            $.get('StartAnalyze', data, function(result) {
-                alert('Success     ' + result);
+            $.get('/Home/StartAnalyze', data, function(result) {
                 id = result;
-                setInterval(timer, 10000);
+                setInterval(timer, 2000);
             });
         });
     });
 </script>
-
+<a ></a>
 <script>
+    function makeMove(move) {
+        board.move(move.slice(0, 2) + '-' + move.slice(-2));
+    }
+
     function timer() {
         var data = {
             guid: id
         }
-        $.get('GetOutput', data, function (result) {
-            $('#output').first().text(result);
+        $.get('GetOutput', data, function (lineInfo) {
+            $('#depth').first().text(lineInfo.Depth);
+            $('#score').first().text(lineInfo.Score);
+            $('#nodes').first().text(lineInfo.Nodes);
+            $('#time').first().text(lineInfo.Time);
+
+            
+            var movesLink = '';
+            for (var i = 0; i < lineInfo.Moves.split(' ').length; i++) {
+                var move = lineInfo.Moves.split(' ')[i];
+                movesLink += i + 1 + '. ' + '<a class="move" onClick="makeMove(\'' + move +  '\')" href="#">' + move + '</a> ';
+            }
+
+            $('#moves').first().empty();
+            $('#moves').first().html(movesLink);
         });
     }
 </script>
-
 
 <script>
     $(document).ready(function () {
@@ -40,9 +55,9 @@
 </script>
 
 <script language="">
+    var board = null;
     $(document).ready(function () {
-        var board,
-      game = new Chess(),
+        var game = new Chess(),
       statusEl = $('#status'),
       fenEl = $('#fen'),
       pgnEl = $('#pgn');
@@ -118,9 +133,20 @@
             onSnapEnd: onSnapEnd
         };
         board = new ChessBoard('board', cfg);
+        
+        $('#startPositionBtn').on('click', board.start);
+
+        $('#move1Btn').on('click', function () {
+            board.move('e2-e4');
+        });
+
+        $('#move2Btn').on('click', function () {
+            board.move('d2-d4', 'g8-f6');
+        });
 
         updateStatus();
     });
+
 </script>
 
 <div class="jumbotron">
@@ -130,12 +156,43 @@
 </div>
 
 <div id="board" style="width: 400px"></div>
-<p>Status: <span id="status"></span></p>
-<p>FEN: <span id="fen"></span></p>
-<p>PGN: <span id="pgn"></span></p>
-Depth: <input id="depthSpinner">
-<input value="Analyze" type="button" id="analyze" />
-<h1 id="output"></h1>
+<div id="analisis">
+    <p>Status: <span id="status"></span></p>
+    <p>FEN: <span id="fen"></span></p>
+    <p>PGN: <span id="pgn"></span></p>
+    Depth: <input id="depthSpinner">
+    <input value="Analyze" type="button" id="analyze" />
+
+
+    <input type="button" id="startPositionBtn" value="Start Position" />
+    <input type="button" id="move1Btn" value="e2-e4" />
+    <input type="button" id="move2Btn" value="d2-d4, g8-f6" />
+    
+    <div id="engineOutput">
+        <table>
+            <tr>
+                <td>Depth</td>
+                <td id="depth"></td>
+            </tr>
+            <tr>
+                <td>Score</td>
+                <td id="score"></td>
+            </tr>
+            <tr>
+                <td>Nodes</td>
+                <td id="nodes"></td>
+            </tr>
+            <tr>
+                <td>Time</td>
+                <td id="time"></td>
+            </tr>
+            <tr>
+                <td>Moves</td>
+                <td id="moves"></td>
+            </tr>
+        </table>
+    </div>
+</div>
 
 
 <div class="row">

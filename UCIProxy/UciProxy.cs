@@ -1,24 +1,10 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace UCIProxy
 {
-    public class UciItem
-    {
-        public UciItem()
-        {
-            Lines = new ConcurrentQueue<string>();
-        }
-
-        public Process Process { get; set; }
-        public ConcurrentQueue<string> Lines { get; set; }
-        public Task ReaderTask { get; set; }
-    }
-
     public class UciProxy
     {
         readonly Dictionary<string, UciItem> _processes = new Dictionary<string, UciItem>();
@@ -39,12 +25,19 @@ namespace UCIProxy
 
                 var process = Process.Start(startInfo);
 
+                process.StandardOutput.ReadLine();
                 process.StandardInput.WriteLine("isready");
+                var isready = process.StandardOutput.ReadLine();
+                if (isready != "readyok")
+                {
+                    throw new InvalidOperationException();
+                }
+
                 process.StandardInput.WriteLine("position fen {0}", fen);
                 process.StandardInput.WriteLine("go depth {0} infinite", depth);
 
                 var guid = Guid.NewGuid();
-                var uciItem = new UciItem()
+                var uciItem = new UciItem
                               {
                                   Process = process
                               };
@@ -64,7 +57,7 @@ namespace UCIProxy
             }
         }
 
-        public string GetProcessOutput(Guid guid)
+        public LineInfo GetProcessOutput(Guid guid)
         {
             UciItem uciItem;
             if (!_processes.TryGetValue(guid.ToString(), out uciItem))
@@ -72,24 +65,26 @@ namespace UCIProxy
                 throw new ArgumentException(string.Format("The process with '{0}' guid was not founded", guid), "guid");
             }
 
-            var result = new StringBuilder();
-            string line;
-            while (uciItem.Lines.TryDequeue(out line))
-            {
-                result.AppendLine(line);
-            }
-
-            return result.ToString();
+            return uciItem.Info;
         }
 
         private async Task ReadLineAsync(UciItem uciItem)
         {
+            var parser = new EngineLineParser();
             string line = "";
 
             while (line != null)
             {
                 line = await uciItem.Process.StandardOutput.ReadLineAsync();
-                uciItem.Lines.Enqueue(line);
+                Debug.WriteLine(line);
+
+                if(parser.IsIntermediateLine(line))
+                    continue;
+
+                if (parser.IsEndLIne(line))
+                    break;
+
+                uciItem.Info = parser.GetLineInfo(line);
             }
         }
     }

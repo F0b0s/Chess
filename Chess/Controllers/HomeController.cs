@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading.Tasks;
+using System.IO;
+using System.Runtime.Serialization.Json;
 using System.Web.Mvc;
 using UCIProxy;
 
@@ -25,7 +24,7 @@ namespace Chess.Controllers
         public ActionResult GetOutput(string guid)
         {
             var output = UciProxy.GetProcessOutput(new Guid(guid));
-            return Content(output);
+            return Json(output, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult About()
