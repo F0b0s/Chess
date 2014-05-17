@@ -15,8 +15,10 @@ namespace Chess.Controllers
             return View();
         }
 
-        public ActionResult StartAnalyze(string fen, string depth)
+        public ActionResult StartAnalyze(string fen, string depth, bool whiteToMove)
         {
+            var moveTurn = whiteToMove ? " w " : " b";
+            fen = fen + moveTurn;
             var guid = UciProxy.Start(fen, int.Parse(depth));
             return Content(guid.ToString());
         }

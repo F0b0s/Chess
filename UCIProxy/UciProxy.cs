@@ -76,6 +76,9 @@ namespace UCIProxy
             while (line != null)
             {
                 line = await uciItem.Process.StandardOutput.ReadLineAsync();
+                if (line == null)
+                    break;
+
                 Debug.WriteLine(line);
 
                 if(parser.IsIntermediateLine(line))

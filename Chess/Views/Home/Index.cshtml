@@ -8,9 +8,11 @@
         $('#analyze').first().click(function () {
             var fen = $('#fen').first();
             var depth = $('#depthSpinner').first();
+            var moveTurn = $('.moveTurn:checked').val();
             var data = {
                 fen: fen.text(),
-                depth: depth.spinner('value')
+                depth: depth.spinner('value'),
+                whiteToMove: moveTurn == 'Белые'? true : false
             }
             $.get('/Home/StartAnalyze', data, function(result) {
                 id = result;
@@ -19,27 +21,33 @@
         });
     });
 </script>
-<a ></a>
+
 <script>
     function makeMove(move) {
         board.move(move.slice(0, 2) + '-' + move.slice(-2));
+    }
+
+    function onPositionChange(oldPos, newPos) {
+        var fen = $('#fen');
+        fen.html(ChessBoard.objToFen(newPos));
     }
 
     function timer() {
         var data = {
             guid: id
         }
-        $.get('GetOutput', data, function (lineInfo) {
-            $('#depth').first().text(lineInfo.Depth);
-            $('#score').first().text(lineInfo.Score);
-            $('#nodes').first().text(lineInfo.Nodes);
-            $('#time').first().text(lineInfo.Time);
-
+        $.get('/Home/GetOutput', data, function (lineInfo, textStatus) {
+            $('#depth').text(lineInfo.Depth);
+            $('#score').text(lineInfo.Score);
+            $('#nodes').text(lineInfo.Nodes);
+            $('#time').text(lineInfo.Time);
             
             var movesLink = '';
             for (var i = 0; i < lineInfo.Moves.split(' ').length; i++) {
                 var move = lineInfo.Moves.split(' ')[i];
-                movesLink += i + 1 + '. ' + '<a class="move" onClick="makeMove(\'' + move +  '\')" href="#">' + move + '</a> ';
+                if (i % 2 == 0)
+                    movesLink += i / 2 + 1 + '. ';
+                movesLink +=  '<a class="move" onClick="makeMove(\'' + move +  '\')" href="#">' + move + '</a> ';
             }
 
             $('#moves').first().empty();
@@ -127,23 +135,19 @@
 
         var cfg = {
             draggable: true,
-            position: 'start',
-            onDragStart: onDragStart,
-            onDrop: onDrop,
-            onSnapEnd: onSnapEnd
+            //position: 'start',
+            //onDragStart: onDragStart,
+            //onDrop: onDrop,
+            dropOffBoard: 'trash',
+            //onSnapEnd: onSnapEnd,
+            onChange: onPositionChange,
+            sparePieces: true
         };
         board = new ChessBoard('board', cfg);
         
         $('#startPositionBtn').on('click', board.start);
-
-        $('#move1Btn').on('click', function () {
-            board.move('e2-e4');
-        });
-
-        $('#move2Btn').on('click', function () {
-            board.move('d2-d4', 'g8-f6');
-        });
-
+        $('#clearBtn').on('click', board.clear);
+        
         updateStatus();
     });
 
@@ -156,17 +160,20 @@
 </div>
 
 <div id="board" style="width: 400px"></div>
+
 <div id="analisis">
     <p>Status: <span id="status"></span></p>
     <p>FEN: <span id="fen"></span></p>
+
     <p>PGN: <span id="pgn"></span></p>
-    Depth: <input id="depthSpinner">
+    Depth: <input id="depthSpinner"><br/>
+    Текущий ход
+    <input class="moveTurn" type="radio" name="wer" value="Белые" title="sdfsdf" checked="True"/> Белые
+    <input class="moveTurn" type="radio" name="wer" value="Черные" /> Черные
+    <br/>
     <input value="Analyze" type="button" id="analyze" />
-
-
     <input type="button" id="startPositionBtn" value="Start Position" />
-    <input type="button" id="move1Btn" value="e2-e4" />
-    <input type="button" id="move2Btn" value="d2-d4, g8-f6" />
+    <input type="button" id="clearBtn" value="Clear" />
     
     <div id="engineOutput">
         <table>
@@ -191,28 +198,5 @@
                 <td id="moves"></td>
             </tr>
         </table>
-    </div>
-</div>
-
-
-<div class="row">
-    <div class="col-md-4">
-        <h2>Getting started</h2>
-        <p>
-            ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-            enables a clean separation of concerns and gives you full control over markup
-            for enjoyable, agile development.
-        </p>
-        <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-        <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Web Hosting</h2>
-        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-        <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
     </div>
 </div>
