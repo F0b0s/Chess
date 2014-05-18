@@ -3,9 +3,13 @@
 }
 
 <script>
-    var id = '';
+    var board = null;
+</script>
+
+<script>
+    var id;
     $(document).ready(function () {
-        $('#analyze').first().click(function () {
+        $('#analyze').click(function () {
             var fen = $('#fen').first();
             var depth = $('#depthSpinner').first();
             var moveTurn = $('.moveTurn:checked').val();
@@ -14,9 +18,17 @@
                 depth: depth.spinner('value'),
                 whiteToMove: moveTurn == 'Белые'? true : false
             }
-            $.get('/Home/StartAnalyze', data, function(result) {
+            $.get('/Home/StartAnalyze', data, function (result) {
                 id = result;
                 setInterval(timer, 2000);
+
+                var cfg = {
+                    draggable: false,
+                    position: board.fen(),
+                    onChange: onPositionChange,
+                };
+
+                board = new ChessBoard('board', cfg);
             });
         });
     });
@@ -54,101 +66,25 @@
             $('#moves').first().html(movesLink);
         });
     }
-</script>
 
-<script>
-    $(document).ready(function () {
+    $(document).ready(function() {
         $("#depthSpinner").spinner();
-    });
-</script>
-
-<script language="">
-    var board = null;
-    $(document).ready(function () {
-        var game = new Chess(),
-      statusEl = $('#status'),
-      fenEl = $('#fen'),
-      pgnEl = $('#pgn');
-
-        // do not pick up pieces if the game is over
-        // only pick up pieces for the side to move
-        var onDragStart = function (source, piece, position, orientation) {
-            if (game.game_over() === true ||
-                (game.turn() === 'w' && piece.search(/^b/) !== -1) ||
-                (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
-                return false;
-            }
-        };
-
-        var onDrop = function (source, target) {
-            // see if the move is legal
-            var move = game.move({
-                from: source,
-                to: target,
-                promotion: 'q' // NOTE: always promote to a queen for example simplicity
-            });
-
-            // illegal move
-            if (move === null) return 'snapback';
-
-            updateStatus();
-        };
-
-        // update the board position after the piece snap 
-        // for castling, en passant, pawn promotion
-        var onSnapEnd = function () {
-            board.position(game.fen());
-        };
-
-        var updateStatus = function () {
-            var status = '';
-
-            var moveColor = 'White';
-            if (game.turn() === 'b') {
-                moveColor = 'Black';
-            }
-
-            // checkmate?
-            if (game.in_checkmate() === true) {
-                status = 'Game over, ' + moveColor + ' is in checkmate.';
-            }
-
-                // draw?
-            else if (game.in_draw() === true) {
-                status = 'Game over, drawn position';
-            }
-
-                // game still on
-            else {
-                status = moveColor + ' to move';
-
-                // check?
-                if (game.in_check() === true) {
-                    status += ', ' + moveColor + ' is in check';
-                }
-            }
-
-            statusEl.html(status);
-            fenEl.html(game.fen());
-            pgnEl.html(game.pgn());
-        };
 
         var cfg = {
-            draggable: true,
-            //position: 'start',
+            //draggable: true,
+            position: '8/8/8/8/8/8/8/8',
             //onDragStart: onDragStart,
             //onDrop: onDrop,
-            dropOffBoard: 'trash',
+            //dropOffBoard: 'trash',
             //onSnapEnd: onSnapEnd,
             onChange: onPositionChange,
             sparePieces: true
         };
         board = new ChessBoard('board', cfg);
-        
+        board.showErrors = 'console';
+        $('#fen').html(cfg.position);
         $('#startPositionBtn').on('click', board.start);
         $('#clearBtn').on('click', board.clear);
-        
-        updateStatus();
     });
 
 </script>
@@ -162,10 +98,7 @@
 <div id="board" style="width: 400px"></div>
 
 <div id="analisis">
-    <p>Status: <span id="status"></span></p>
     <p>FEN: <span id="fen"></span></p>
-
-    <p>PGN: <span id="pgn"></span></p>
     Depth: <input id="depthSpinner"><br/>
     Текущий ход
     <input class="moveTurn" type="radio" name="wer" value="Белые" title="sdfsdf" checked="True"/> Белые
