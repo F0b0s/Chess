@@ -20,7 +20,7 @@
             }
             $.get('/Home/StartAnalyze', data, function (result) {
                 id = result;
-                setInterval(timer, 2000);
+                setTimeout(timer, 2000);
 
                 var cfg = {
                     draggable: false,
@@ -35,8 +35,9 @@
 </script>
 
 <script>
-    function makeMove(move) {
-        board.move(move.slice(0, 2) + '-' + move.slice(-2));
+    function makeMove(position) {
+        //board.move(move.slice(0, 2) + '-' + move.slice(-2));
+        board.position(position, true);
     }
 
     function onPositionChange(oldPos, newPos) {
@@ -53,17 +54,33 @@
             $('#score').text(lineInfo.Score);
             $('#nodes').text(lineInfo.Nodes);
             $('#time').text(lineInfo.Time);
-            
+
+            var cfg = {
+                position: board.fen()
+            };
+            var fakeBoard = new ChessBoard('fakeBoard', cfg);
+            $('#moves').first().empty();
+
             var movesLink = '';
             for (var i = 0; i < lineInfo.Moves.split(' ').length; i++) {
                 var move = lineInfo.Moves.split(' ')[i];
-                if (i % 2 == 0)
-                    movesLink += i / 2 + 1 + '. ';
-                movesLink +=  '<a class="move" onClick="makeMove(\'' + move +  '\')" href="#">' + move + '</a> ';
+                fakeBoard.move(move.slice(0, 2) + '-' + move.slice(-2));
+                var currentPosition = fakeBoard.fen();
+                if (i % 2 == 0) {
+                    var currentMove = i / 2 + 1 + '. ';
+                    $('#moves').append($('<span>' + currentMove + '</span>'));
+                }
+                    
+                $('#moves').append($('<a class="move" onClick="makeMove(\'' + currentPosition + '\')" href="#">' + move + '</a> '));
+
+
+//                if (i % 2 == 0)
+//                    movesLink += i / 2 + 1 + '. ';
+//                movesLink += '<a class="move" onClick="makeMove(\'' + currentPosition + '\')" href="#">' + move + '</a> ';
             }
 
-            $('#moves').first().empty();
-            $('#moves').first().html(movesLink);
+//            $('#moves').first().empty();
+//            $('#moves').first().html(movesLink);
         });
     }
 
@@ -89,13 +106,8 @@
 
 </script>
 
-<div class="jumbotron">
-    <h1>ASP.NET</h1>
-    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-    <p><a href="http://asp.net" class="btn btn-primary btn-large">Learn more &raquo;</a></p>
-</div>
-
 <div id="board" style="width: 400px"></div>
+<div id="fakeBoard" hidden="true"></div>
 
 <div id="analisis">
     <p>FEN: <span id="fen"></span></p>
@@ -128,7 +140,9 @@
             </tr>
             <tr>
                 <td>Moves</td>
-                <td id="moves"></td>
+                <td>
+                    <div id="moves"></div>
+                </td>
             </tr>
         </table>
     </div>
