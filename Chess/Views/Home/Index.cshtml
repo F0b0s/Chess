@@ -49,34 +49,40 @@
         var data = {
             guid: id
         }
-        $.get('/Home/GetOutput', data, function (lineInfo, textStatus) {
-            $('#depth').text(lineInfo.Depth);
-            $('#score').text(lineInfo.Score);
-            $('#nodes').text(lineInfo.Nodes);
-            $('#time').text(lineInfo.Time);
+        $.get('/Home/GetOutput', data, function (lines, textStatus) {
+            $('#depth').text(lines[0].Depth);
+            $('#score').text(lines[0].Score);
+            $('#nodes').text(lines[0].Nodes);
+            $('#time').text(lines[0].Time);
 
             var cfg = {
                 position: board.fen()
             };
-            var fakeBoard = new ChessBoard('fakeBoard', cfg);
-            $('#moves').first().empty();
 
-            var movesLink = '';
-            for (var i = 0; i < lineInfo.Moves.split(' ').length; i++) {
-                var move = lineInfo.Moves.split(' ')[i];
-                fakeBoard.move(move.slice(0, 2) + '-' + move.slice(-2));
-                var currentPosition = fakeBoard.fen();
-                if (i % 2 == 0) {
-                    var currentMove = i / 2 + 1 + '. ';
-                    $('#moves').append($('<span>' + currentMove + '</span>'));
+            $('#moves').empty();
+
+            for (var j = 0; j < lines.length; j++) {
+                var divLine = $('<div/>');
+                var fakeBoard = new ChessBoard('fakeBoard', cfg);
+                var lineInfo = lines[j];
+
+                for (var i = 0; i < lineInfo.Moves.split(' ').length; i++) {
+                    var move = lineInfo.Moves.split(' ')[i];
+                    fakeBoard.move(move.slice(0, 2) + '-' + move.slice(-2));
+                    var currentPosition = fakeBoard.fen();
+                    if (i % 2 == 0) {
+                        var currentMove = i / 2 + 1 + '. ';
+                        divLine.append($('<span>' + currentMove + '</span>'));
+                    }
+
+                    divLine.append($('<a class="move" onClick="makeMove(\'' + currentPosition + '\')" href="#">' + move + '</a> '));
+
+
+                    //                if (i % 2 == 0)
+                    //                    movesLink += i / 2 + 1 + '. ';
+                    //                movesLink += '<a class="move" onClick="makeMove(\'' + currentPosition + '\')" href="#">' + move + '</a> ';
                 }
-                    
-                $('#moves').append($('<a class="move" onClick="makeMove(\'' + currentPosition + '\')" href="#">' + move + '</a> '));
-
-
-//                if (i % 2 == 0)
-//                    movesLink += i / 2 + 1 + '. ';
-//                movesLink += '<a class="move" onClick="makeMove(\'' + currentPosition + '\')" href="#">' + move + '</a> ';
+                $('#moves').append(divLine);
             }
 
 //            $('#moves').first().empty();
@@ -140,8 +146,8 @@
             </tr>
             <tr>
                 <td>Moves</td>
-                <td>
-                    <div id="moves"></div>
+                <td id="moves">
+                    
                 </td>
             </tr>
         </table>

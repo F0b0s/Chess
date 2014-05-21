@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using System;
+using System.Collections.Generic;
+using NUnit.Framework;
 using UCIProxy;
 
 namespace Tests
@@ -51,6 +53,22 @@ namespace Tests
             var engineLine = "info depth 5 seldepth 5 score cp 54 nodes 3014 nps 602800 time 5 multipv 1 pv g1f3 d7d5 d2d4 g8f6 b1c3";
             var parser = new EngineLineParser();
             Assert.False(parser.IsIntermediateLine(engineLine));
+        }
+
+        [Test]
+        public void ShouldParseMultiPvInfo()
+        {
+            var engineLine = "info depth 5 seldepth 5 score cp 54 nodes 3014 nps 602800 time 5 multipv 2 pv g1f3 d7d5 d2d4 g8f6 b1c3";
+            var parser = new EngineLineParser();
+            Assert.AreEqual(2, parser.GetMultiPv(engineLine));
+        }
+
+        [Test]
+        public void MultiPvWasNotFounded()
+        {
+            var engineLine = "info depth 5 seldepth 5 score cp 54 nodes 3014 nps 602800 time 5 pv g1f3 d7d5 d2d4 g8f6 b1c3";
+            var parser = new EngineLineParser();
+            Assert.Throws<ArgumentException>(() => parser.GetMultiPv(engineLine));
         }
     }
 }

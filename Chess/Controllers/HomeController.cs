@@ -19,7 +19,7 @@ namespace Chess.Controllers
         {
             var moveTurn = whiteToMove ? " w " : " b";
             fen = fen + moveTurn;
-            var guid = UciProxy.Start(fen, int.Parse(depth));
+            var guid = UciProxy.Start(fen, int.Parse(depth), 2);
             return Content(guid.ToString());
         }
 

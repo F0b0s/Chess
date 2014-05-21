@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 
 namespace UCIProxy
 {
@@ -8,6 +9,7 @@ namespace UCIProxy
         readonly Regex _scoreRegex = new Regex("cp (\\d+)");
         readonly Regex _nodesRegex = new Regex("nodes (\\d+)");
         readonly Regex _timeRegex = new Regex("time (\\d+)");
+        readonly Regex _multipvRegex = new Regex(" multipv (\\d+)");
         readonly Regex _movesRegex = new Regex(" pv ([\\s\\S]+)");
         readonly Regex _endLineRegex = new Regex("^info nodes \\d+ time \\d+$");
         readonly Regex _intermediateLineRegex = new Regex("currmove");
@@ -57,6 +59,25 @@ namespace UCIProxy
         public bool IsIntermediateLine(string engineLine)
         {
             return _intermediateLineRegex.IsMatch(engineLine);
+        }
+
+        public uint GetMultiPv(string line)
+        {
+            var matc = _multipvRegex.Match(line);
+            if (!matc.Success)
+            {
+                throw new ArgumentException(string.Format("Should contain multipv info '{0}'", line));
+            }
+
+            var multipvStr =  matc.Groups[1].Value;
+            uint multipv;
+
+            if (uint.TryParse(multipvStr, out multipv))
+            {
+                return multipv;
+            }
+
+            throw new ArgumentException(string.Format("Can't parse multipv info '{0}'", line));
         }
     }
 }

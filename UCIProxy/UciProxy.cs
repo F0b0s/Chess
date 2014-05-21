@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace UCIProxy
 {
     public class UciProxy
     {
+        private static  object _sync = new object();
         readonly Dictionary<string, UciItem> _processes = new Dictionary<string, UciItem>();
 
-        public Guid Start(string fen, int depth)
+        public Guid Start(string fen, int depth, int multiPv)
         {
             try
             {
@@ -33,11 +35,12 @@ namespace UCIProxy
                     throw new InvalidOperationException();
                 }
 
+                process.StandardInput.WriteLine("setoption name Multipv value " + multiPv);
                 process.StandardInput.WriteLine("position fen {0}", fen);
                 process.StandardInput.WriteLine("go depth {0} infinite", depth);
 
                 var guid = Guid.NewGuid();
-                var uciItem = new UciItem
+                var uciItem = new UciItem(multiPv)
                               {
                                   Process = process
                               };
@@ -57,7 +60,7 @@ namespace UCIProxy
             }
         }
 
-        public LineInfo GetProcessOutput(Guid guid)
+        public IEnumerable<LineInfo> GetProcessOutput(Guid guid)
         {
             UciItem uciItem;
             if (!_processes.TryGetValue(guid.ToString(), out uciItem))
@@ -65,7 +68,7 @@ namespace UCIProxy
                 throw new ArgumentException(string.Format("The process with '{0}' guid was not founded", guid), "guid");
             }
 
-            return uciItem.Info;
+            return uciItem.Infos;
         }
 
         private async Task ReadLineAsync(UciItem uciItem)
@@ -87,7 +90,12 @@ namespace UCIProxy
                 if (parser.IsEndLIne(line))
                     break;
 
-                uciItem.Info = parser.GetLineInfo(line);
+                var multiPv = parser.GetMultiPv(line);
+
+                lock (_sync)
+                {
+                    uciItem.Infos[(int) (multiPv - 1)] = parser.GetLineInfo(line);
+                }
             }
         }
     }
