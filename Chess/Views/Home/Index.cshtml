@@ -4,9 +4,6 @@
 
 <script>
     var board = null;
-</script>
-
-<script>
     var id;
     $(document).ready(function () {
         $('#analyze').click(function () {
@@ -32,11 +29,28 @@
             });
         });
     });
+
+    $(document).ready(function () {
+        $("#depthSpinner").spinner();
+        $("#depthSpinner").spinner('value', 1);
+
+        var cfg = {
+            position: '8/8/8/8/8/8/8/8',
+            onChange: onPositionChange,
+            sparePieces: true
+        };
+        board = new ChessBoard('board', cfg);
+        board.showErrors = 'console';
+        $('#fen').html(cfg.position);
+        $('#startPositionBtn').on('click', board.start);
+        $('#clearBtn').on('click', board.clear);
+    });
 </script>
 
 <script>
-    function makeMove(position) {
-        //board.move(move.slice(0, 2) + '-' + move.slice(-2));
+    function makeMove(position, caller) {
+        $('.move').removeClass('currentMove');
+        $(caller).addClass('currentMove');
         board.position(position, true);
     }
 
@@ -60,64 +74,58 @@
             };
 
             $('#moves').empty();
+            var fen = board.fen();
+            $('#start').click(function() {
+                makeMove(fen);
+            });
 
             for (var j = 0; j < lines.length; j++) {
                 var divLine = $('<div/>');
                 var fakeBoard = new ChessBoard('fakeBoard', cfg);
                 var lineInfo = lines[j];
-
-                for (var i = 0; i < lineInfo.Moves.split(' ').length; i++) {
-                    var move = lineInfo.Moves.split(' ')[i];
+                
+                var moves = lineInfo.Moves.split(' ');
+                for (var i = 0; i < moves.length; i++) {
+                    var move = moves[i];
                     fakeBoard.move(move.slice(0, 2) + '-' + move.slice(-2));
                     var currentPosition = fakeBoard.fen();
                     if (i % 2 == 0) {
                         var currentMove = i / 2 + 1 + '. ';
-                        divLine.append($('<span>' + currentMove + '</span>'));
+                        divLine.append($(' <span>' + currentMove + '</span>'));
                     }
 
-                    divLine.append($('<a class="move" onClick="makeMove(\'' + currentPosition + '\')" href="#">' + move + '</a> '));
-
-
-                    //                if (i % 2 == 0)
-                    //                    movesLink += i / 2 + 1 + '. ';
-                    //                movesLink += '<a class="move" onClick="makeMove(\'' + currentPosition + '\')" href="#">' + move + '</a> ';
+                    divLine.append($('<a class="move" onClick="makeMove(\'' + currentPosition + '\', this)" href="#">' + move + ' </a>'));
                 }
                 $('#moves').append(divLine);
             }
-
-//            $('#moves').first().empty();
-//            $('#moves').first().html(movesLink);
         });
     }
 
-    $(document).ready(function() {
-        $("#depthSpinner").spinner();
+    function moveLeft() {
+        var leftElement = $('.currentMove').prevUntil('#moves', '.move').first();
+        if (leftElement.length == 0)
+            $('#start').click();
+        else
+            leftElement.first().click();
+    }
 
-        var cfg = {
-            //draggable: true,
-            position: '8/8/8/8/8/8/8/8',
-            //onDragStart: onDragStart,
-            //onDrop: onDrop,
-            //dropOffBoard: 'trash',
-            //onSnapEnd: onSnapEnd,
-            onChange: onPositionChange,
-            sparePieces: true
-        };
-        board = new ChessBoard('board', cfg);
-        board.showErrors = 'console';
-        $('#fen').html(cfg.position);
-        $('#startPositionBtn').on('click', board.start);
-        $('#clearBtn').on('click', board.clear);
-    });
+    function moveRight() {
+        $('.currentMove').nextUntil('#moves', '.move').first().click();
+    }
+
+    function moveToEOF() {
+        $('.currentMove').nextUntil('#moves', '.move').last().click();
+    }
 
 </script>
 
 <div id="board" style="width: 400px"></div>
+<p>FEN: <span id="fen"></span></p>
 <div id="fakeBoard" hidden="true"></div>
 
 <div id="analisis">
-    <p>FEN: <span id="fen"></span></p>
-    Depth: <input id="depthSpinner"><br/>
+    
+    Depth: <input id="depthSpinner" min="1" max="30" ><br/>
     Текущий ход
     <input class="moveTurn" type="radio" name="wer" value="Белые" title="sdfsdf" checked="True"/> Белые
     <input class="moveTurn" type="radio" name="wer" value="Черные" /> Черные
@@ -143,6 +151,15 @@
             <tr>
                 <td>Time</td>
                 <td id="time"></td>
+            </tr>
+            <tr>
+                <td>Navigation</td>
+                <td id="navigation">
+                    <input type="button" value="start" id="start"/>
+                    <input type="button" value="left" onclick="moveLeft()" />
+                    <input type="button" value="right" onclick="moveRight()"/>
+                    <input type="button" value="eof" onclick="moveToEOF()"/>
+                </td>
             </tr>
             <tr>
                 <td>Moves</td>
