@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,18 +22,17 @@ namespace UCIProxy
                                     RedirectStandardInput = true,
                                     RedirectStandardOutput = true,
                                     RedirectStandardError = true,
-                                    FileName =
-                                        @"C:\Users\юленька\Downloads\stockfish-dd-win\stockfish-dd-win\Windows\stockfish-dd-64-modern.exe"
+                                    FileName = ConfigurationManager.AppSettings["EnginePath"]
                                 };
 
                 var process = Process.Start(startInfo);
 
                 process.StandardOutput.ReadLine();
                 process.StandardInput.WriteLine("isready");
-                var isready = process.StandardOutput.ReadLine();
-                if (isready != "readyok")
+                var isReady = process.StandardOutput.ReadLine();
+                if (isReady != "readyok")
                 {
-                    throw new InvalidOperationException();
+                    throw new InvalidOperationException("Engine is not ready.");
                 }
 
                 process.StandardInput.WriteLine("setoption name Multipv value " + multiPv);
