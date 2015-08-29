@@ -10,7 +10,7 @@
 }
 
 /* Set width on the form input elements since they're 100% wide by default */
-input,
+/*input,*/
 select,
 textarea {
     max-width: 280px;
@@ -42,9 +42,25 @@ input[type="checkbox"].input-validation-error {
 }
 
 #board {
-    width: 200px;
-    float: left
+    width: 400px;
 }
 
 /*custom styles*/
-.currentMove {border-style: solid; border-width: 1px; border-color: gray}
+.currentMove {
+    border-style: solid; 
+    border-width: 1px; 
+    border-color: gray
+}
+
+#chessBoard {
+    float: left;
+}
+
+.fen {
+    display: inline-block;
+    width: 100%
+}
+
+#fen {
+    width: 90%
+}

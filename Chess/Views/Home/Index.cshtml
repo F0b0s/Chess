@@ -11,7 +11,7 @@
             var depth = $('#depthSpinner').first();
             var moveTurn = $('.moveTurn:checked').val();
             var data = {
-                fen: fen.text(),
+                fen: fen.val(),
                 depth: depth.spinner('value'),
                 whiteToMove: moveTurn == 'Белые'? true : false
             }
@@ -41,7 +41,7 @@
         };
         board = new ChessBoard('board', cfg);
         board.showErrors = 'console';
-        $('#fen').html(cfg.position);
+        $('#fen').val(cfg.position);
         $('#startPositionBtn').on('click', board.start);
         $('#clearBtn').on('click', board.clear);
     });
@@ -56,7 +56,7 @@
 
     function onPositionChange(oldPos, newPos) {
         var fen = $('#fen');
-        fen.html(ChessBoard.objToFen(newPos));
+        fen.val(ChessBoard.objToFen(newPos));
     }
 
     function timer() {
@@ -119,12 +119,15 @@
 
 </script>
 
-<div id="board" style="width: 400px"></div>
-<p>FEN: <span id="fen"></span></p>
-<div id="fakeBoard" hidden="true"></div>
+<div id="chessBoard">
+    <div id="board"></div>
+    <span class="fen">
+        <label>FEN: </label>
+        <input id="fen" type="text"/>
+    </span>
+</div>
 
 <div id="analisys">
-    
     Depth: <input id="depthSpinner" min="1" max="30" ><br/>
     Текущий ход
     <input class="moveTurn" type="radio" name="wer" value="Белые" title="sdfsdf" checked="True"/> Белые
@@ -170,3 +173,5 @@
         </table>
     </div>
 </div>
+
+<div id="fakeBoard" hidden="true" />
