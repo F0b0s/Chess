@@ -135,6 +135,11 @@
     <Content Include="Content\Images\bP.png" />
     <Content Include="Content\Images\bQ.png" />
     <Content Include="Content\Images\bR.png" />
+    <Content Include="Content\Images\end.png" />
+    <Content Include="Content\Images\flip.png" />
+    <Content Include="Content\Images\left.png" />
+    <Content Include="Content\Images\right.png" />
+    <Content Include="Content\Images\start.png" />
     <Content Include="Content\Images\wB.png" />
     <Content Include="Content\Images\wK.png" />
     <Content Include="Content\Images\wN.png" />

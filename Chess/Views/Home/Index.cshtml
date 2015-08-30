@@ -64,19 +64,17 @@
             guid: id
         }
         $.get('/Home/GetOutput', data, function (lines, textStatus) {
-            $('#depth').text(lines[0].Depth);
-            $('#score').text(lines[0].Score);
-            $('#nodes').text(lines[0].Nodes);
-            $('#time').text(lines[0].Time);
+            var infoLine = lines[0].Time / 1000 + ' sec, depth ' + lines[0].Depth + ', ' + lines[0].Nodes + ' nodes';
+            $('#infoLine').text(infoLine);
 
             var cfg = {
                 position: board.fen()
             };
 
             $('#moves').empty();
-            var fen = board.fen();
+            $('#scores').empty();
             $('#start').click(function() {
-                makeMove(fen);
+                makeMove(board.fen());
             });
 
             for (var j = 0; j < lines.length; j++) {
@@ -97,6 +95,7 @@
                     divLine.append($('<a class="move" onClick="makeMove(\'' + currentPosition + '\', this)" href="#">' + move + ' </a>'));
                 }
                 $('#moves').append(divLine);
+                $('#scores').append('<div>' + lineInfo.Score / 100 + '</div>');
             }
         });
     }
@@ -117,10 +116,20 @@
         $('.currentMove').nextUntil('#moves', '.move').last().click();
     }
 
+    function flipBoard() {
+        board.flip();
+    }
 </script>
 
 <div id="chessBoard">
     <div id="board"></div>
+    <div class="navigation">
+        <input type="image" src="/content/images/flip.png" width="16" height="16" id="flip" onclick="flipBoard()"/>
+        <input type="image" src="/content/images/start.png" width="16" height="16" id="start" />
+        <input type="image" src="/content/images/left.png" width="16" height="16" onclick="moveLeft()" />
+        <input type="image" src="/content/images/right.png" width="16" height="16" onclick="moveRight()" />
+        <input type="image" src="/content/images/end.png" width="16" height="16"  onclick="moveToEOF()" />
+    </div>
     <span class="fen">
         <label>FEN: </label>
         <input id="fen" type="text"/>
@@ -140,35 +149,15 @@
     <div id="engineOutput">
         <table>
             <tr>
-                <td>Depth</td>
-                <td id="depth"></td>
+                <td>Evaluation</td>
+                <td>Line</td>
             </tr>
             <tr>
-                <td>Score</td>
-                <td id="score"></td>
+                <td id="scores"/>
+                <td id="moves" />
             </tr>
             <tr>
-                <td>Nodes</td>
-                <td id="nodes"></td>
-            </tr>
-            <tr>
-                <td>Time</td>
-                <td id="time"></td>
-            </tr>
-            <tr>
-                <td>Navigation</td>
-                <td id="navigation">
-                    <input type="button" value="start" id="start"/>
-                    <input type="button" value="left" onclick="moveLeft()" />
-                    <input type="button" value="right" onclick="moveRight()"/>
-                    <input type="button" value="eof" onclick="moveToEOF()"/>
-                </td>
-            </tr>
-            <tr>
-                <td>Moves</td>
-                <td id="moves">
-                    
-                </td>
+                <td id="infoLine" colspan="2"></td>
             </tr>
         </table>
     </div>
