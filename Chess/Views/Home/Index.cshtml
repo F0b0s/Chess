@@ -5,32 +5,6 @@
 <script>
     var board = null;
     var id;
-    $(document).ready(function () {
-        $('#analyze').click(function () {
-            $('#positionNavigation').hide();
-            $('#analisysNavigation').show();
-            var fen = $('#fen').first();
-            var depth = $('#depthSpinner').first();
-            var moveTurn = $('.moveTurn:checked').val();
-            var data = {
-                fen: fen.val(),
-                depth: depth.spinner('value'),
-                whiteToMove: moveTurn == 'Белые'? true : false
-            }
-            $.get('/Home/StartAnalyze', data, function (result) {
-                id = result;
-                setTimeout(timer, 2000);
-
-                var cfg = {
-                    draggable: false,
-                    position: board.fen(),
-                    onChange: onPositionChange,
-                };
-
-                board = new ChessBoard('board', cfg);
-            });
-        });
-    });
 
     $(document).ready(function () {
         $("#depthSpinner").spinner();
@@ -101,6 +75,31 @@
         });
     }
 
+    function analize() {
+        $('#positionNavigation').hide();
+        $('#analisysNavigation').show();
+        var fen = $('#fen').first();
+        var depth = $('#depthSpinner').first();
+        var moveTurn = $('.moveTurn:checked').val();
+        var data = {
+            fen: fen.val(),
+            depth: depth.spinner('value'),
+            whiteToMove: moveTurn == 'Белые' ? true : false
+        }
+        $.get('/Home/StartAnalyze', data, function (result) {
+            id = result;
+            setTimeout(timer, 2000);
+
+            var cfg = {
+                draggable: false,
+                position: board.fen(),
+                onChange: onPositionChange,
+            };
+
+            board = new ChessBoard('board', cfg);
+        });
+    }
+
     function moveLeft() {
         $('.currentMove').prevUntil('#moves', '.move').first().click();
     }
@@ -150,12 +149,13 @@
 </div>
 
 <div id="analisys">
-    Depth: <input id="depthSpinner" min="1" max="30" ><br/>
-    Текущий ход
-    <input class="moveTurn" type="radio" name="wer" value="Белые" title="sdfsdf" checked="True"/> Белые
-    <input class="moveTurn" type="radio" name="wer" value="Черные" /> Черные
+    <label>Depth:</label>
+    <input id="depthSpinner" min="1" max="30" ><br/>
+    <label>Текущий ход:</label>
+    <input class="moveTurn" type="radio" name="wer" value="Белые" title="sdfsdf" checked="True"/> <label>Белые</label>
+    <input class="moveTurn" type="radio" name="wer" value="Черные" /> <label>Черные</label>
     <br/>
-    <input value="Analyze" type="button" id="analyze" />
+    <input value="Analyze" type="button" id="analyze" onclick="analize()"/>
     <div id="engineOutput">
         <table>
             <tr>
