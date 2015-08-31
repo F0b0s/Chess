@@ -71,7 +71,13 @@ input[type="checkbox"].input-validation-error {
     width: 90%;
 }
 
-.navigation {
+#analisysNavigation {
     margin: 2px;
     text-align: center
 }
+
+#positionNavigation {
+    margin: 2px;
+    text-align: center;
+}
+

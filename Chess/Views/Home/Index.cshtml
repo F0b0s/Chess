@@ -7,6 +7,8 @@
     var id;
     $(document).ready(function () {
         $('#analyze').click(function () {
+            $('#positionNavigation').hide();
+            $('#analisysNavigation').show();
             var fen = $('#fen').first();
             var depth = $('#depthSpinner').first();
             var moveTurn = $('.moveTurn:checked').val();
@@ -94,6 +96,8 @@
                 $('#moves').append(divLine);
                 $('#scores').append('<div>' + lineInfo.Score / 100 + '</div>');
             }
+
+            makeMove(board.fen(), $('#moves').find('a').first());
         });
     }
 
@@ -128,12 +132,14 @@
 
 <div id="chessBoard">
     <div id="board"></div>
-    <div class="navigation">
+    <div id="analisysNavigation" hidden="true">
         <input type="image" src="/content/images/flip.png" width="16" height="16" id="flip" onclick="flipBoard()"/>
         <input type="image" src="/content/images/start.png" width="16" height="16" onclick="moveStart()" />
         <input type="image" src="/content/images/left.png" width="16" height="16" onclick="moveLeft()" />
         <input type="image" src="/content/images/right.png" width="16" height="16" onclick="moveRight()" />
         <input type="image" src="/content/images/end.png" width="16" height="16"  onclick="moveEnd()" />
+    </div>
+    <div id="positionNavigation">
         <input type="button" id="startPositionBtn" value="Start Position" onclick="setStartPosition()" />
         <input type="button" id="clearBtn" value="Clear" onclick="clearBoard()" />
     </div>
