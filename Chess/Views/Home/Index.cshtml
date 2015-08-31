@@ -42,8 +42,6 @@
         board = new ChessBoard('board', cfg);
         board.showErrors = 'console';
         $('#fen').val(cfg.position);
-        $('#startPositionBtn').on('click', board.start);
-        $('#clearBtn').on('click', board.clear);
     });
 </script>
 
@@ -73,9 +71,6 @@
 
             $('#moves').empty();
             $('#scores').empty();
-            $('#start').click(function() {
-                makeMove(board.fen());
-            });
 
             for (var j = 0; j < lines.length; j++) {
                 var divLine = $('<div/>');
@@ -83,6 +78,8 @@
                 var lineInfo = lines[j];
                 
                 var moves = lineInfo.Moves.split(' ');
+                divLine.append($('<a class="move" hidden="true" onClick="makeMove(\'' + board.fen() + '\', this)" href="#"></a>'));
+
                 for (var i = 0; i < moves.length; i++) {
                     var move = moves[i];
                     fakeBoard.move(move.slice(0, 2) + '-' + move.slice(-2));
@@ -101,23 +98,31 @@
     }
 
     function moveLeft() {
-        var leftElement = $('.currentMove').prevUntil('#moves', '.move').first();
-        if (leftElement.length == 0)
-            $('#start').click();
-        else
-            leftElement.first().click();
+        $('.currentMove').prevUntil('#moves', '.move').first().click();
     }
 
     function moveRight() {
         $('.currentMove').nextUntil('#moves', '.move').first().click();
     }
 
-    function moveToEOF() {
+    function moveStart() {
+        $('.currentMove').prevUntil('#moves', '.move').last().click();
+    }
+
+    function moveEnd() {
         $('.currentMove').nextUntil('#moves', '.move').last().click();
     }
 
     function flipBoard() {
         board.flip();
+    }
+
+    function setStartPosition() {
+        board.start();
+    }
+
+    function clearBoard() {
+        board.clear();
     }
 </script>
 
@@ -125,10 +130,12 @@
     <div id="board"></div>
     <div class="navigation">
         <input type="image" src="/content/images/flip.png" width="16" height="16" id="flip" onclick="flipBoard()"/>
-        <input type="image" src="/content/images/start.png" width="16" height="16" id="start" />
+        <input type="image" src="/content/images/start.png" width="16" height="16" onclick="moveStart()" />
         <input type="image" src="/content/images/left.png" width="16" height="16" onclick="moveLeft()" />
         <input type="image" src="/content/images/right.png" width="16" height="16" onclick="moveRight()" />
-        <input type="image" src="/content/images/end.png" width="16" height="16"  onclick="moveToEOF()" />
+        <input type="image" src="/content/images/end.png" width="16" height="16"  onclick="moveEnd()" />
+        <input type="button" id="startPositionBtn" value="Start Position" onclick="setStartPosition()" />
+        <input type="button" id="clearBtn" value="Clear" onclick="clearBoard()" />
     </div>
     <span class="fen">
         <label>FEN: </label>
@@ -143,9 +150,6 @@
     <input class="moveTurn" type="radio" name="wer" value="Черные" /> Черные
     <br/>
     <input value="Analyze" type="button" id="analyze" />
-    <input type="button" id="startPositionBtn" value="Start Position" />
-    <input type="button" id="clearBtn" value="Clear" />
-    
     <div id="engineOutput">
         <table>
             <tr>
