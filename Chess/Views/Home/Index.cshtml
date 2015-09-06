@@ -9,15 +9,7 @@
     $(document).ready(function () {
         $("#depthSpinner").spinner();
         $("#depthSpinner").spinner('value', 1);
-
-        var cfg = {
-            position: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-            onChange: onPositionChange,
-            sparePieces: true
-        };
-        board = new ChessBoard('board', cfg);
-        board.showErrors = 'console';
-        $('#fen').val(cfg.position);
+        initializeBoard();
     });
 </script>
 
@@ -26,6 +18,17 @@
         $('.move').removeClass('currentMove');
         $(caller).addClass('currentMove');
         board.position(position, true);
+    }
+
+    function initializeBoard() {
+        var cfg = {
+            position: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+            onChange: onPositionChange,
+            sparePieces: true
+        };
+        board = new ChessBoard('board', cfg);
+        board.showErrors = 'console';
+        $('#fen').val(cfg.position);
     }
 
     function onPositionChange(oldPos, newPos) {
@@ -41,11 +44,9 @@
             var cfg = {
                 position: board.fen()
             };
-
-            $('#moves').empty();
-            $('#scores').empty();
+            
             $('#engineOutput').show();
-            $('#analisysSettings').hide();
+            $('#analysisSettings').hide();
 
             var headerRow = $('<tr><td>Evaluation</td><td>Line</td></tr>');
             $('#engineTable').append(headerRow);
@@ -79,6 +80,8 @@
             var infoRow = '<tr><td colspan="2">' + lines[0].Time / 1000 + ' sec, depth ' + lines[0].Depth + ', ' + lines[0].Nodes + ' nodes' + '</td></tr>';
             $('#engineTable').append(infoRow);
             makeMove(board.fen(), $('#moves').find('a').first());
+            $('#analysisNavigation').show();
+            $('#startNewAnalysisBtn').show();
         });
     }
 
@@ -89,7 +92,7 @@
         }
 
         $('#positionNavigation').hide();
-        $('#analisysNavigation').show();
+        
         var fen = $('#fen').first();
         var depth = $('#depthSpinner').first();
         var moveTurn = $('.moveTurn:checked').val();
@@ -143,11 +146,20 @@
     function changeBoardFen() {
         board.position($('#fen').val());
     }
+
+    function startNewAnalysis() {
+        $('#analysisSettings').show();
+        $('#engineTable').empty();
+        $('#startNewAnalysisBtn').hide();
+
+        board.destroy();
+        initializeBoard();
+    }
 </script>
 
 <div id="chessBoard">
     <div id="board"></div>
-    <div id="analisysNavigation" hidden="true">
+    <div id="analysisNavigation" hidden="true">
         <input type="image" src="/content/images/flip.png" width="16" height="16" id="flip" onclick="flipBoard()"/>
         <input type="image" src="/content/images/start.png" width="16" height="16" onclick="moveStart()" />
         <input type="image" src="/content/images/left.png" width="16" height="16" onclick="moveLeft()" />
@@ -164,8 +176,8 @@
     </span>
 </div>
 
-<div id="analisys">
-    <div id="analisysSettings">
+<div id="analysis">
+    <div id="analysisSettings">
         <label>Depth:</label>
         <input id="depthSpinner" min="1" max="30">
         <input value="Analyze" type="button" id="analyze" onclick="analyze()" />
@@ -177,6 +189,8 @@
     <div id="engineOutput" hidden="true">
         <table border="1" id="engineTable" />
     </div>
+    <div id="test">
+        <input type="button" id="startNewAnalysisBtn" value="New Analysis" onclick="startNewAnalysis()" hidden="true" />
+    </div>
 </div>
-
 <div id="fakeBoard" hidden="true" />
