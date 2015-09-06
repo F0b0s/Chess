@@ -38,9 +38,6 @@
             guid: id
         }
         $.get('/Home/GetOutput', data, function (lines, textStatus) {
-            var infoLine = lines[0].Time / 1000 + ' sec, depth ' + lines[0].Depth + ', ' + lines[0].Nodes + ' nodes';
-            $('#infoLine').text(infoLine);
-
             var cfg = {
                 position: board.fen()
             };
@@ -50,13 +47,16 @@
             $('#engineOutput').show();
             $('#analisysSettings').hide();
 
+            var headerRow = $('<tr><td>Evaluation</td><td>Line</td></tr>');
+            $('#engineTable').append(headerRow);
+
             for (var j = 0; j < lines.length; j++) {
-                var divLine = $('<div/>');
+                var cell = $('<td/>');
                 var fakeBoard = new ChessBoard('fakeBoard', cfg);
                 var lineInfo = lines[j];
                 
                 var moves = lineInfo.Moves.split(' ');
-                divLine.append($('<a class="move" hidden="true" onClick="makeMove(\'' + board.fen() + '\', this)" href="#"></a>'));
+                cell.append($('<a class="move" hidden="true" onClick="makeMove(\'' + board.fen() + '\', this)" href="#"></a>'));
 
                 for (var i = 0; i < moves.length; i++) {
                     var move = moves[i];
@@ -64,15 +64,20 @@
                     var currentPosition = fakeBoard.fen();
                     if (i % 2 == 0) {
                         var currentMove = i / 2 + 1 + '. ';
-                        divLine.append($(' <span>' + currentMove + '</span>'));
+                        cell.append($(' <span>' + currentMove + '</span>'));
                     }
 
-                    divLine.append($('<a class="move" onClick="makeMove(\'' + currentPosition + '\', this)" href="#">' + move + ' </a>'));
+                    cell.append($('<a class="move" onClick="makeMove(\'' + currentPosition + '\', this)" href="#">' + move + ' </a>'));
                 }
-                $('#moves').append(divLine);
-                $('#scores').append('<div>' + lineInfo.Score / 100 + '</div>');
+
+                var row = $('<tr/>')
+                    .append('<td>' + lineInfo.Score / 100 + '</td>')
+                    .append(cell);
+                $('#engineTable').append(row);
             }
 
+            var infoRow = '<tr><td colspan="2">' + lines[0].Time / 1000 + ' sec, depth ' + lines[0].Depth + ', ' + lines[0].Nodes + ' nodes' + '</td></tr>';
+            $('#engineTable').append(infoRow);
             makeMove(board.fen(), $('#moves').find('a').first());
         });
     }
@@ -170,19 +175,7 @@
         <input class="moveTurn" type="radio" name="wer" value="Черные" /> <label>Черные</label>
     </div>
     <div id="engineOutput" hidden="true">
-        <table>
-            <tr>
-                <td>Evaluation</td>
-                <td>Line</td>
-            </tr>
-            <tr>
-                <td id="scores"/>
-                <td id="moves" />
-            </tr>
-            <tr>
-                <td id="infoLine" colspan="2"></td>
-            </tr>
-        </table>
+        <table border="1" id="engineTable" />
     </div>
 </div>
 
