@@ -11,7 +11,7 @@
         $("#depthSpinner").spinner('value', 1);
 
         var cfg = {
-            position: '8/8/8/8/8/8/8/8',
+            position: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
             onChange: onPositionChange,
             sparePieces: true
         };
@@ -47,6 +47,8 @@
 
             $('#moves').empty();
             $('#scores').empty();
+            $('#engineOutput').show();
+            $('#analisysSettings').hide();
 
             for (var j = 0; j < lines.length; j++) {
                 var divLine = $('<div/>');
@@ -75,7 +77,12 @@
         });
     }
 
-    function analize() {
+    function analyze() {
+        if (board.fen() == '8/8/8/8/8/8/8/8') {
+            alert('Set position for analysis!');
+            return;
+        }
+
         $('#positionNavigation').hide();
         $('#analisysNavigation').show();
         var fen = $('#fen').first();
@@ -127,6 +134,10 @@
     function clearBoard() {
         board.clear();
     }
+
+    function changeBoardFen() {
+        board.position($('#fen').val());
+    }
 </script>
 
 <div id="chessBoard">
@@ -144,19 +155,21 @@
     </div>
     <span class="fen">
         <label>FEN: </label>
-        <input id="fen" type="text"/>
+        <input id="fen" type="text" oninput="changeBoardFen()"/>
     </span>
 </div>
 
 <div id="analisys">
-    <label>Depth:</label>
-    <input id="depthSpinner" min="1" max="30"><br/>
-    <label>Текущий ход:</label>
-    <input class="moveTurn" type="radio" name="wer" value="Белые" title="sdfsdf" checked="True"/> <label>Белые</label>
-    <input class="moveTurn" type="radio" name="wer" value="Черные" /> <label>Черные</label>
-    <br/>
-    <input value="Analyze" type="button" id="analyze" onclick="analize()"/>
-    <div id="engineOutput">
+    <div id="analisysSettings">
+        <label>Depth:</label>
+        <input id="depthSpinner" min="1" max="30">
+        <input value="Analyze" type="button" id="analyze" onclick="analyze()" />
+        <br />
+        <label>Текущий ход:</label>
+        <input class="moveTurn" type="radio" name="wer" value="Белые" title="sdfsdf" checked="True" /> <label>Белые</label>
+        <input class="moveTurn" type="radio" name="wer" value="Черные" /> <label>Черные</label>
+    </div>
+    <div id="engineOutput" hidden="true">
         <table>
             <tr>
                 <td>Evaluation</td>
