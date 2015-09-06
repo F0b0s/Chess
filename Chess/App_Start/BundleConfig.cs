@@ -26,7 +26,10 @@ namespace Chess
             bundles.Add(new StyleBundle("~/Content/css").Include(
                 "~/Content/bootstrap.css",
                 "~/Content/site.css",
-                "~/Content/chessboard-0.3.0.css"));
+                "~/Content/chessboard-0.3.0.css",
+                "~/Content/themes/base/spinner.css",
+                "~/Content/themes/base/all.css"
+                ));
             //"~/Content/jquery-ui-1.10.4.css"));
         }
     }
