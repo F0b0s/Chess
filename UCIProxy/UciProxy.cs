@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace UCIProxy
@@ -65,7 +64,7 @@ namespace UCIProxy
             UciItem uciItem;
             if (!_processes.TryGetValue(guid.ToString(), out uciItem))
             {
-                throw new ArgumentException(string.Format("The process with '{0}' guid was not founded", guid), "guid");
+                throw new ArgumentException(string.Format("The process with '{0}' guid was not found", guid), "guid");
             }
 
             return uciItem.Infos;

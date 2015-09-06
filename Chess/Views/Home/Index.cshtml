@@ -9,6 +9,8 @@
     $(document).ready(function () {
         $("#depthSpinner").spinner();
         $("#depthSpinner").spinner('value', 1);
+        $("#outputLinesSpinner").spinner();
+        $("#outputLinesSpinner").spinner('value', 1);
         initializeBoard();
     });
 </script>
@@ -93,12 +95,11 @@
 
         $('#positionNavigation').hide();
         
-        var fen = $('#fen').first();
-        var depth = $('#depthSpinner').first();
         var moveTurn = $('.moveTurn:checked').val();
         var data = {
-            fen: fen.val(),
-            depth: depth.spinner('value'),
+            fen: $('#fen').val(),
+            depth: $('#depthSpinner').spinner('value'),
+            outputLines: $('#outputLinesSpinner').val(),
             whiteToMove: moveTurn == 'Белые' ? true : false
         }
         $.get('/Home/StartAnalyze', data, function (result) {
@@ -151,6 +152,8 @@
         $('#analysisSettings').show();
         $('#engineTable').empty();
         $('#startNewAnalysisBtn').hide();
+        $('#positionNavigation').show();
+        $('#analysisNavigation').hide();
 
         board.destroy();
         initializeBoard();
@@ -180,6 +183,8 @@
     <div id="analysisSettings">
         <label>Depth:</label>
         <input id="depthSpinner" min="1" max="30">
+        <label>Output lines:</label>
+        <input id="outputLinesSpinner" min="1" max="5">
         <input value="Analyze" type="button" id="analyze" onclick="analyze()" />
         <br />
         <label>Текущий ход:</label>

@@ -13,11 +13,11 @@ namespace Chess.Controllers
             return View();
         }
 
-        public ActionResult StartAnalyze(string fen, string depth, bool whiteToMove)
+        public ActionResult StartAnalyze(string fen, string depth, int outputLines, bool whiteToMove)
         {
             var moveTurn = whiteToMove ? " w " : " b";
             fen = fen + moveTurn;
-            var guid = UciProxy.Start(fen, int.Parse(depth), 2);
+            var guid = UciProxy.Start(fen, int.Parse(depth), outputLines);
             return Content(guid.ToString());
         }
 
