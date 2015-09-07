@@ -81,7 +81,7 @@
 
             var infoRow = '<tr><td colspan="2">' + lines[0].Time / 1000 + ' sec, depth ' + lines[0].Depth + ', ' + lines[0].Nodes + ' nodes' + '</td></tr>';
             $('#engineTable').append(infoRow);
-            makeMove(board.fen(), $('#moves').find('a').first());
+            makeMove(board.fen(), $('#engineTable').find('a').first());
             $('#analysisNavigation').show();
             $('#startNewAnalysisBtn').show();
         });

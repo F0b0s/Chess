@@ -81,3 +81,7 @@ input[type="checkbox"].input-validation-error {
     margin: 2px;
     text-align: center;
 }
+
+#startNewAnalysisBtn {
+    margin: 0px 0px 10px 0px;
+}
