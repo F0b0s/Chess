@@ -49,7 +49,11 @@ namespace UCIProxy
                               };
                 uciItem.Infos.EngneInfo = engneInfo;
                 _processes.Add(guid.ToString(), uciItem);
-                var task = Task.Factory.StartNew(async () => await ReadLineAsync(uciItem));
+                var task = Task.Factory.StartNew(async () =>
+                                                       {
+                                                           await ReadLineAsync(uciItem);
+                                                           if (process != null) process.Close();
+                                                       });
                 
                 uciItem.ReaderTask = task;
 

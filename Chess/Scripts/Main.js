@@ -18,6 +18,7 @@ function makeMove(position, caller) {
 
 function initializeBoard() {
     var cfg = {
+        showNotation: true,
         position: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
         onChange: onPositionChange,
         sparePieces: true

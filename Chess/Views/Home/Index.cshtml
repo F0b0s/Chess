@@ -2,6 +2,10 @@
     ViewBag.Title = "Home Page";
 }
 
+@Scripts.Render("~/Scripts/chessboard-0.3.0.js")
+@Scripts.Render("~/Scripts/chess.js")
+@Scripts.Render("~/Scripts/Main.js")
+
 <div id="chessBoard">
     <div id="board"></div>
     <div id="analysisNavigation" hidden="true">
