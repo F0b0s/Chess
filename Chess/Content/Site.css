@@ -85,3 +85,7 @@ input[type="checkbox"].input-validation-error {
 #startNewAnalysisBtn {
     margin: 0px 0px 10px 0px;
 }
+
+.error label {
+    color: red;
+}

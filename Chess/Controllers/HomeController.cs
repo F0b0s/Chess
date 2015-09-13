@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Web.Mvc;
 using UCIProxy;
 
 namespace Chess.Controllers
 {
+    [HandleError]
     public class HomeController : Controller
     {
         static readonly UciProxy UciProxy = new UciProxy();

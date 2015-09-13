@@ -10,9 +10,22 @@ namespace UCIProxy
     {
         private static readonly object _sync = new object();
         readonly Dictionary<string, UciItem> _processes = new Dictionary<string, UciItem>();
+        private int _maxAnalisysyDepth;
+        private int _maxOutputLines;
+
+        public UciProxy()
+        {
+            _maxAnalisysyDepth = Int32.Parse(ConfigurationManager.AppSettings["MaxAnalysisDepth"]);
+            _maxOutputLines = Int32.Parse(ConfigurationManager.AppSettings["MaxOutputLines"]);
+        }
 
         public Guid Start(string fen, int depth, int multiPv)
         {
+            if (depth > _maxAnalisysyDepth || multiPv > _maxOutputLines)
+            {
+                throw new ArgumentException("Max thresold overflow");
+            }
+
             try
             {
                 var startInfo = new ProcessStartInfo

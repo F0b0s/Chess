@@ -41,56 +41,61 @@
         var data = {
             guid: id
         }
-        $.get('/Home/GetOutput', data, function (analysisContainer) {
-            if (analysisContainer.Completed == true) {
-                clearInterval(timerId);
-            }
-            
-            var cfg = {
-                position: board.fen()
-            };
-            
-            $('#engineOutput').show();
-            $('#analysisSettings').hide();
+        $.get('/Home/GetOutput', data)
+            .done(handleSuccessSuccess)
+            .done(handleEngineAnalysis)
+            .fail(handleServerError);
+    }
 
-            var headerRow = $('<tr><td>Evaluation</td><td>Line</td></tr>');
-            $('#engineTable').empty();
-            $('#engineTable').append(headerRow);
+    function handleEngineAnalysis(analysisContainer) {
+        if (analysisContainer.Completed == true) {
+            clearInterval(timerId);
+        }
 
-            var lines = analysisContainer.PositionAnalysis.Lines;
-            for (var j = 0; j < lines.length; j++) {
-                var cell = $('<td/>');
-                var fakeBoard = new ChessBoard('fakeBoard', cfg);
-                var lineInfo = lines[j];
-                
-                var moves = lineInfo.Moves.split(' ');
-                cell.append($('<a class="move" hidden="true" onClick="makeMove(\'' + board.fen() + '\', this)" href="#"></a>'));
+        var cfg = {
+            position: board.fen()
+        };
 
-                for (var i = 0; i < moves.length; i++) {
-                    var move = moves[i];
-                    fakeBoard.move(move.slice(0, 2) + '-' + move.slice(-2));
-                    var currentPosition = fakeBoard.fen();
-                    if (i % 2 == 0) {
-                        var currentMove = i / 2 + 1 + '. ';
-                        cell.append($(' <span>' + currentMove + '</span>'));
-                    }
+        $('#engineOutput').show();
+        $('#analysisSettings').hide();
 
-                    cell.append($('<a class="move" onClick="makeMove(\'' + currentPosition + '\', this)" href="#">' + move + ' </a>'));
+        var headerRow = $('<tr><td>Evaluation</td><td>Line</td></tr>');
+        $('#engineTable').empty();
+        $('#engineTable').append(headerRow);
+
+        var lines = analysisContainer.PositionAnalysis.Lines;
+        for (var j = 0; j < lines.length; j++) {
+            var cell = $('<td/>');
+            var fakeBoard = new ChessBoard('fakeBoard', cfg);
+            var lineInfo = lines[j];
+
+            var moves = lineInfo.Moves.split(' ');
+            cell.append($('<a class="move" hidden="true" onClick="makeMove(\'' + board.fen() + '\', this)" href="#"></a>'));
+
+            for (var i = 0; i < moves.length; i++) {
+                var move = moves[i];
+                fakeBoard.move(move.slice(0, 2) + '-' + move.slice(-2));
+                var currentPosition = fakeBoard.fen();
+                if (i % 2 == 0) {
+                    var currentMove = i / 2 + 1 + '. ';
+                    cell.append($(' <span>' + currentMove + '</span>'));
                 }
 
-                var row = $('<tr/>')
-                    .append('<td>' + lineInfo.Score / 100 + '</td>')
-                    .append(cell);
-                $('#engineTable').append(row);
+                cell.append($('<a class="move" onClick="makeMove(\'' + currentPosition + '\', this)" href="#">' + move + ' </a>'));
             }
 
-            var info = analysisContainer.PositionAnalysis;
-            var infoRow = '<tr><td colspan="2">' + info.EngneInfo + ', ' + info.AnalysisStatistics.Time / 1000 + ' sec, depth ' + info.AnalysisStatistics.Depth + ', ' + info.AnalysisStatistics.Nodes + ' nodes' + '</td></tr>';
-            $('#engineTable').append(infoRow);
-            makeMove(board.fen(), $('#engineTable').find('a').first());
-            $('#analysisNavigation').show();
-            $('#startNewAnalysisBtn').show();
-        });
+            var row = $('<tr/>')
+                .append('<td>' + lineInfo.Score / 100 + '</td>')
+                .append(cell);
+            $('#engineTable').append(row);
+        }
+
+        var info = analysisContainer.PositionAnalysis;
+        var infoRow = '<tr><td colspan="2">' + info.EngneInfo + ', ' + info.AnalysisStatistics.Time / 1000 + ' sec, depth ' + info.AnalysisStatistics.Depth + ', ' + info.AnalysisStatistics.Nodes + ' nodes' + '</td></tr>';
+        $('#engineTable').append(infoRow);
+        makeMove(board.fen(), $('#engineTable').find('a').first());
+        $('#analysisNavigation').show();
+        $('#startNewAnalysisBtn').show();
     }
 
     function analyze() {
@@ -108,18 +113,38 @@
             outputLines: $('#outputLinesSpinner').val(),
             whiteToMove: moveTurn == 'Белые' ? true : false
         }
-        $.get('/Home/StartAnalyze', data, function (result) {
-            id = result;
-            timerId = setInterval(timer, 500);
 
-            var cfg = {
-                draggable: false,
-                position: board.fen(),
-                onChange: onPositionChange,
-            };
+        $.get('/Home/StartAnalyze', data)
+            .done(handleSuccessSuccess)
+            .done(startPolling)
+            .fail(handleServerError);
+    }
 
-            board = new ChessBoard('board', cfg);
-        });
+    function startPolling(response) {
+        id = response;
+        timerId = setInterval(timer, 500);
+
+        var cfg = {
+            draggable: false,
+            position: board.fen(),
+            onChange: onPositionChange,
+        };
+
+        board = new ChessBoard('board', cfg);
+    }
+
+    function handleSuccessSuccess(){
+        $('.error').hide();
+    }
+
+    function handleServerError() {
+        if (timerId != undefined) {
+            clearInterval(timerId);
+        }
+
+        $('.error').empty();
+        $('.error').show();
+        $('.error').append($('<label/>').text('Error, please, try again.'));
     }
 
     function moveLeft() {
@@ -186,11 +211,13 @@
 </div>
 
 <div id="analysis">
+    <div class="error">
+    </div>
     <div id="analysisSettings">
         <label>Depth:</label>
-        <input id="depthSpinner" min="1" max="30">
+        <input id="depthSpinner" min="1" max="20">
         <label>Output lines:</label>
-        <input id="outputLinesSpinner" min="1" max="5">
+        <input id="outputLinesSpinner" min="1" max="3">
         <input value="Analyze" type="button" id="analyze" onclick="analyze()" />
         <br />
         <label>Текущий ход:</label>
@@ -204,4 +231,5 @@
         <input type="button" id="startNewAnalysisBtn" value="New Analysis" onclick="startNewAnalysis()" hidden="true" />
     </div>
 </div>
+
 <div id="fakeBoard" hidden="true" />
