@@ -32,12 +32,16 @@
         <label>Depth:</label>
         <input id="depthSpinner" min="1" max="20">
         <label>Output lines:</label>
-        <input id="outputLinesSpinner" min="1" max="3">
+        <input id="outputLinesSpinner" min="1" max="3" />
         <input value="Analyze" type="button" id="analyze" onclick="analyze()" />
         <br />
-        <label>Текущий ход:</label>
-        <input class="moveTurn" type="radio" name="wer" value="Белые" title="sdfsdf" checked="True" /> <label>Белые</label>
-        <input class="moveTurn" type="radio" name="wer" value="Черные" /> <label>Черные</label>
+        <label>Current move:</label>
+        <input class="moveTurn" name="moveTurn" type="radio" value="w" checked="checked" onchange="moveTurnChanged()"/> <label>White</label>
+        <input class="moveTurn" name="moveTurn" type="radio" value="b" onchange="moveTurnChanged()" /> <label>Black</label>
+        <input type="checkbox" id="w00" onchange="moveTurnChanged()" checked="checked">White 0-0
+        <input type="checkbox" id="w000" onchange="moveTurnChanged()" checked="checked">White 0-0-0
+        <input type="checkbox" id="b00" onchange="moveTurnChanged()" checked="checked">Black 0-0
+        <input type="checkbox" id="b000" onchange="moveTurnChanged()" checked="checked">Black 0-0-0
     </div>
     <div id="engineOutput" hidden="true">
         <table border="1" id="engineTable" />

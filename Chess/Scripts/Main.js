@@ -28,9 +28,38 @@ function initializeBoard() {
     $('#fen').val(cfg.position);
 }
 
+function createFenString(newPos) {
+    var positionFen = ChessBoard.objToFen(newPos);
+    var moveTurn = $('.moveTurn:checked').val();
+    var fen = positionFen + ' ' + moveTurn + ' ';
+    if ($('#w00').prop('checked'))  {
+        fen += 'K';
+    }
+
+    if ($('#w000').prop('checked')) {
+        fen += 'Q';
+    }
+
+    if ($('#b00').prop('checked')) {
+        fen += 'k';
+    }
+
+    if ($('#b000').prop('checked')) {
+        fen += 'q';
+    }
+
+    fen += ' - 0 1';
+    return fen;
+}
+
+function moveTurnChanged() {
+    var fenString = createFenString(board.position());
+    $('#fen').val(fenString);
+}
+
 function onPositionChange(oldPos, newPos) {
-    var fen = $('#fen');
-    fen.val(ChessBoard.objToFen(newPos));
+    var fenString = createFenString(newPos);
+    $('#fen').val(fenString);
 }
 
 function timer() {
@@ -101,13 +130,11 @@ function analyze() {
     }
 
     $('#positionNavigation').hide();
-
-    var moveTurn = $('.moveTurn:checked').val();
+    
     var data = {
         fen: $('#fen').val(),
         depth: $('#depthSpinner').spinner('value'),
-        outputLines: $('#outputLinesSpinner').val(),
-        whiteToMove: moveTurn == 'Белые' ? true : false
+        outputLines: $('#outputLinesSpinner').val()
     }
 
     $.get('/Home/StartAnalyze', data)

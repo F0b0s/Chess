@@ -8,10 +8,10 @@ namespace UCIProxy
 {
     public class UciProxy
     {
-        private static readonly object _sync = new object();
+        private static readonly object Sync = new object();
         readonly Dictionary<string, UciItem> _processes = new Dictionary<string, UciItem>();
-        private int _maxAnalisysyDepth;
-        private int _maxOutputLines;
+        private readonly int _maxAnalisysyDepth;
+        private readonly int _maxOutputLines;
 
         public UciProxy()
         {
@@ -117,7 +117,7 @@ namespace UCIProxy
                 var lineInfo = parser.GetLineInfo(line);
                 var analysisStatistics = parser.GetAnalysisStatistic(line);
                 
-                lock (_sync)
+                lock (Sync)
                 {
                     uciItem.Infos.Lines[(int) (multiPv - 1)] = lineInfo;
                     uciItem.Infos.AnalysisStatistics = analysisStatistics;
