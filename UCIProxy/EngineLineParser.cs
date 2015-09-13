@@ -11,35 +11,41 @@ namespace UCIProxy
         readonly Regex _timeRegex = new Regex("time (\\d+)");
         readonly Regex _multipvRegex = new Regex(" multipv (\\d+)");
         readonly Regex _movesRegex = new Regex(" pv ([\\s\\S]+)");
-        readonly Regex _endLineRegex = new Regex("^info nodes \\d+ time \\d+$");
+        readonly Regex _endLineRegex = new Regex("^bestmove");
         readonly Regex _intermediateLineRegex = new Regex("currmove");
 
-        public LineInfo GetLineInfo(string engineLine)
+        public AnalysisStatistics GetAnalysisStatistic(string engineLine)
         {
-            var lineInfo = new LineInfo();
-
+            var analysisStatistics = new AnalysisStatistics();
             var match = _depthRegex.Match(engineLine);
             if (match.Success)
             {
-                lineInfo.Depth = match.Groups[1].Value;
-            }
-
-            match = _scoreRegex.Match(engineLine);
-            if (match.Success)
-            {
-                lineInfo.Score = match.Groups[1].Value;
+                analysisStatistics.Depth = match.Groups[1].Value;
             }
 
             match = _nodesRegex.Match(engineLine);
             if (match.Success)
             {
-                lineInfo.Nodes = match.Groups[1].Value;
+                analysisStatistics.Nodes = match.Groups[1].Value;
             }
 
             match = _timeRegex.Match(engineLine);
             if (match.Success)
             {
-                lineInfo.Time = match.Groups[1].Value;
+                analysisStatistics.Time = match.Groups[1].Value;
+            }
+
+            return analysisStatistics;
+        }
+
+        public LineInfo GetLineInfo(string engineLine)
+        {
+            var lineInfo = new LineInfo();
+
+            var match = _scoreRegex.Match(engineLine);
+            if (match.Success)
+            {
+                lineInfo.Score = match.Groups[1].Value;
             }
 
             match = _movesRegex.Match(engineLine);

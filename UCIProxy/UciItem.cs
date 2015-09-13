@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace UCIProxy
@@ -8,18 +7,16 @@ namespace UCIProxy
     {
         public UciItem(int multipv)
         {
-            Infos = new List<LineInfo>();
-
-            for (int i = 0; i < multipv; i++)
-            {
-                Infos.Add(new LineInfo());
-            }
+            Infos = new PositionAnalysis
+                    {
+                        Lines = new LineInfo[multipv]
+                    };
         }
 
         public Process Process { get; set; }
 
-        public List<LineInfo> Infos { get; set; }
+        public PositionAnalysis Infos { get; set; }
 
-        public Task ReaderTask { get; set; }
+        public Task<Task> ReaderTask { get; set; }
     }
 }

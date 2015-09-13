@@ -15,11 +15,12 @@ namespace Tests
             var parser = new EngineLineParser();
             var lineInfo = parser.GetLineInfo(engineLine);
 
-            Assert.AreEqual("5", lineInfo.Depth);
-            Assert.AreEqual("54", lineInfo.Score);
-            Assert.AreEqual("3014", lineInfo.Nodes);
-            Assert.AreEqual("5", lineInfo.Time);
+            //Assert.AreEqual("5", lineInfo.Depth);
+            //Assert.AreEqual("54", lineInfo.Score);
+            //Assert.AreEqual("3014", lineInfo.Nodes);
+            //Assert.AreEqual("5", lineInfo.Time);
             Assert.AreEqual("g1f3 d7d5 d2d4 g8f6 b1c3", lineInfo.Moves);
+            Assert.Fail("Fix me");
         }
 
         [Test]

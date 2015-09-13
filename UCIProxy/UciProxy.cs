@@ -8,7 +8,7 @@ namespace UCIProxy
 {
     public class UciProxy
     {
-        private static  object _sync = new object();
+        private static readonly object _sync = new object();
         readonly Dictionary<string, UciItem> _processes = new Dictionary<string, UciItem>();
 
         public Guid Start(string fen, int depth, int multiPv)
@@ -36,7 +36,7 @@ namespace UCIProxy
 
                 process.StandardInput.WriteLine("setoption name Multipv value " + multiPv);
                 process.StandardInput.WriteLine("position fen {0}", fen);
-                process.StandardInput.WriteLine("go depth {0} infinite", depth);
+                process.StandardInput.WriteLine("go depth {0}", depth);
 
                 var guid = Guid.NewGuid();
                 var uciItem = new UciItem(multiPv)
@@ -44,22 +44,20 @@ namespace UCIProxy
                                   Process = process
                               };
                 _processes.Add(guid.ToString(), uciItem);
-                var task = Task.Factory.StartNew(() =>
-                                                 {
-                                                     ReadLineAsync(uciItem);
-                                                 });
+                var task = Task.Factory.StartNew(async () => await ReadLineAsync(uciItem));
+                
                 uciItem.ReaderTask = task;
 
                 return guid;
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex.Message);
+                Debug.WriteLine(ex.ToString());
                 throw;
             }
         }
 
-        public IEnumerable<LineInfo> GetProcessOutput(Guid guid)
+        public PositionAnalysisContainer GetProcessOutput(Guid guid)
         {
             UciItem uciItem;
             if (!_processes.TryGetValue(guid.ToString(), out uciItem))
@@ -67,7 +65,11 @@ namespace UCIProxy
                 throw new ArgumentException(string.Format("The process with '{0}' guid was not found", guid), "guid");
             }
 
-            return uciItem.Infos;
+            return new PositionAnalysisContainer
+                                    {
+                                        PositionAnalysis = uciItem.Infos,
+                                        Completed = uciItem.ReaderTask.Result.IsCompleted
+                                    };
         }
 
         private async Task ReadLineAsync(UciItem uciItem)
@@ -78,22 +80,23 @@ namespace UCIProxy
             while (line != null)
             {
                 line = await uciItem.Process.StandardOutput.ReadLineAsync();
-                if (line == null)
-                    break;
 
                 Debug.WriteLine(line);
 
-                if(parser.IsIntermediateLine(line))
+                if (parser.IsIntermediateLine(line))
                     continue;
 
                 if (parser.IsEndLIne(line))
                     break;
 
                 var multiPv = parser.GetMultiPv(line);
-
+                var lineInfo = parser.GetLineInfo(line);
+                var analysisStatistics = parser.GetAnalysisStatistic(line);
+                
                 lock (_sync)
                 {
-                    uciItem.Infos[(int) (multiPv - 1)] = parser.GetLineInfo(line);
+                    uciItem.Infos.Lines[(int) (multiPv - 1)] = lineInfo;
+                    uciItem.Infos.AnalysisStatistics = analysisStatistics;
                 }
             }
         }

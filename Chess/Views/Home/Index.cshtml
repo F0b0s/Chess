@@ -5,6 +5,7 @@
 <script>
     var board = null;
     var id;
+    var timerId;
 
     $(document).ready(function () {
         $("#depthSpinner").spinner();
@@ -13,9 +14,7 @@
         $("#outputLinesSpinner").spinner('value', 1);
         initializeBoard();
     });
-</script>
 
-<script>
     function makeMove(position, caller) {
         $('.move').removeClass('currentMove');
         $(caller).addClass('currentMove');
@@ -42,7 +41,11 @@
         var data = {
             guid: id
         }
-        $.get('/Home/GetOutput', data, function (lines, textStatus) {
+        $.get('/Home/GetOutput', data, function (analysisContainer) {
+            if (analysisContainer.Completed == true) {
+                clearInterval(timerId);
+            }
+            
             var cfg = {
                 position: board.fen()
             };
@@ -51,8 +54,10 @@
             $('#analysisSettings').hide();
 
             var headerRow = $('<tr><td>Evaluation</td><td>Line</td></tr>');
+            $('#engineTable').empty();
             $('#engineTable').append(headerRow);
 
+            var lines = analysisContainer.PositionAnalysis.Lines;
             for (var j = 0; j < lines.length; j++) {
                 var cell = $('<td/>');
                 var fakeBoard = new ChessBoard('fakeBoard', cfg);
@@ -79,7 +84,8 @@
                 $('#engineTable').append(row);
             }
 
-            var infoRow = '<tr><td colspan="2">' + lines[0].Time / 1000 + ' sec, depth ' + lines[0].Depth + ', ' + lines[0].Nodes + ' nodes' + '</td></tr>';
+            var info = analysisContainer.PositionAnalysis;
+            var infoRow = '<tr><td colspan="2">' + info.AnalysisStatistics.Time / 1000 + ' sec, depth ' + info.AnalysisStatistics.Depth + ', ' + info.AnalysisStatistics.Nodes + ' nodes' + '</td></tr>';
             $('#engineTable').append(infoRow);
             makeMove(board.fen(), $('#engineTable').find('a').first());
             $('#analysisNavigation').show();
@@ -104,7 +110,7 @@
         }
         $.get('/Home/StartAnalyze', data, function (result) {
             id = result;
-            setTimeout(timer, 2000);
+            timerId = setInterval(timer, 500);
 
             var cfg = {
                 draggable: false,
