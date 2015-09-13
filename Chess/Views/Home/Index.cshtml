@@ -85,7 +85,7 @@
             }
 
             var info = analysisContainer.PositionAnalysis;
-            var infoRow = '<tr><td colspan="2">' + info.AnalysisStatistics.Time / 1000 + ' sec, depth ' + info.AnalysisStatistics.Depth + ', ' + info.AnalysisStatistics.Nodes + ' nodes' + '</td></tr>';
+            var infoRow = '<tr><td colspan="2">' + info.EngneInfo + ', ' + info.AnalysisStatistics.Time / 1000 + ' sec, depth ' + info.AnalysisStatistics.Depth + ', ' + info.AnalysisStatistics.Nodes + ' nodes' + '</td></tr>';
             $('#engineTable').append(infoRow);
             makeMove(board.fen(), $('#engineTable').find('a').first());
             $('#analysisNavigation').show();

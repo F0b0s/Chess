@@ -26,23 +26,15 @@ namespace UCIProxy
 
                 var process = Process.Start(startInfo);
 
-                process.StandardOutput.ReadLine();
-                process.StandardInput.WriteLine("isready");
-                var isReady = process.StandardOutput.ReadLine();
-                if (isReady != "readyok")
-                {
-                    throw new InvalidOperationException("Engine is not ready.");
-                }
-
-                process.StandardInput.WriteLine("setoption name Multipv value " + multiPv);
-                process.StandardInput.WriteLine("position fen {0}", fen);
-                process.StandardInput.WriteLine("go depth {0}", depth);
+                var engneInfo = GetEngineInfo(process);
+                PrepareEngine(fen, depth, multiPv, process);
 
                 var guid = Guid.NewGuid();
                 var uciItem = new UciItem(multiPv)
                               {
                                   Process = process
                               };
+                uciItem.Infos.EngneInfo = engneInfo;
                 _processes.Add(guid.ToString(), uciItem);
                 var task = Task.Factory.StartNew(async () => await ReadLineAsync(uciItem));
                 
@@ -55,6 +47,21 @@ namespace UCIProxy
                 Debug.WriteLine(ex.ToString());
                 throw;
             }
+        }
+
+        private void PrepareEngine(string fen, int depth, int multiPv, Process process)
+        {
+            ClearProcessOutput(process);
+            process.StandardInput.WriteLine("isready");
+            var isReady = process.StandardOutput.ReadLine();
+            if (isReady != "readyok")
+            {
+                throw new InvalidOperationException("Engine is not ready.");
+            }
+
+            process.StandardInput.WriteLine("setoption name Multipv value " + multiPv);
+            process.StandardInput.WriteLine("position fen {0}", fen);
+            process.StandardInput.WriteLine("go depth {0}", depth);
         }
 
         public PositionAnalysisContainer GetProcessOutput(Guid guid)
@@ -98,6 +105,33 @@ namespace UCIProxy
                     uciItem.Infos.Lines[(int) (multiPv - 1)] = lineInfo;
                     uciItem.Infos.AnalysisStatistics = analysisStatistics;
                 }
+            }
+        }
+
+        private string GetEngineInfo(Process process)
+        {
+            ClearProcessOutput(process);
+            process.StandardInput.WriteLine("uci");
+            string engineName;
+            var parser = new EngineInfoParser();
+
+            while (true)
+            {
+                string line = process.StandardOutput.ReadLine();
+
+                if (parser.TryGetEngineName(line, out engineName) || line == "uciok")
+                    break;
+            }
+
+            return engineName;
+        }
+
+        private void ClearProcessOutput(Process process)
+        {
+            while (process.StandardOutput.Peek() != -1)
+            {
+                var line = process.StandardOutput.ReadLine();
+                Debug.WriteLine("Discarded line: {0}", line);
             }
         }
     }

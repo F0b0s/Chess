@@ -25,7 +25,6 @@ namespace Chess.Controllers
         public ActionResult GetOutput(string guid)
         {
             var output = UciProxy.GetProcessOutput(new Guid(guid));
-            Debug.WriteLine(string.Format("Id = {0}, depth: {1}, ", guid, output.PositionAnalysis.AnalysisStatistics.Depth));
 
             return Json(output, JsonRequestBehavior.AllowGet);
         }

@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EngineInfoParser.cs" />
     <Compile Include="EngineLineParser.cs" />
     <Compile Include="LineInfo.cs" />
     <Compile Include="UciItem.cs" />

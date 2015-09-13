@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace UCIProxy
 {
-    public class EngineLineParser
+    class EngineLineParser
     {
         readonly Regex _depthRegex = new Regex("depth (\\d+)");
         readonly Regex _scoreRegex = new Regex("cp (\\d+)");
