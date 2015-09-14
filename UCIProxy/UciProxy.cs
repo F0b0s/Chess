@@ -52,7 +52,8 @@ namespace UCIProxy
                 var task = Task.Factory.StartNew(async () =>
                                                        {
                                                            await ReadLineAsync(uciItem);
-                                                           if (process != null) process.Close();
+                                                           if (process != null) 
+                                                                process.Kill();
                                                        });
                 
                 uciItem.ReaderTask = task;
