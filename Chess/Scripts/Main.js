@@ -28,8 +28,8 @@ function initializeBoard() {
     $('#fen').val(cfg.position);
 }
 
-function createFenString(newPos) {
-    var positionFen = ChessBoard.objToFen(newPos);
+function createFenString() {
+    var positionFen = board.fen();
     var moveTurn = $('.moveTurn:checked').val();
     var fen = positionFen + ' ' + moveTurn + ' ';
     if ($('#w00').prop('checked'))  {
@@ -53,12 +53,12 @@ function createFenString(newPos) {
 }
 
 function moveTurnChanged() {
-    var fenString = createFenString(board.position());
+    var fenString = createFenString();
     $('#fen').val(fenString);
 }
 
-function onPositionChange(oldPos, newPos) {
-    var fenString = createFenString(newPos);
+function onPositionChange() {
+    var fenString = createFenString();
     $('#fen').val(fenString);
 }
 
@@ -95,18 +95,27 @@ function handleEngineAnalysis(analysisContainer) {
         var lineInfo = lines[j];
 
         var moves = lineInfo.Moves.split(' ');
-        cell.append($('<a class="move" hidden="true" onClick="makeMove(\'' + board.fen() + '\', this)" href="#"></a>'));
-
+        var initialPosition = board.fen();
+        $('<a class="move" hidden="true" href="#"></a>').appendTo(cell).click(function () { makeMove(initialPosition, this); });
+        
         for (var i = 0; i < moves.length; i++) {
-            var move = moves[i];
-            fakeBoard.move(move.slice(0, 2) + '-' + move.slice(-2));
-            var currentPosition = fakeBoard.fen();
-            if (i % 2 == 0) {
-                var currentMove = i / 2 + 1 + '. ';
-                cell.append($(' <span>' + currentMove + '</span>'));
-            }
-
-            cell.append($('<a class="move" onClick="makeMove(\'' + currentPosition + '\', this)" href="#">' + move + ' </a>'));
+            (function(n) {
+                var move = moves[n];
+                fakeBoard.move(move.slice(0, 2) + '-' + move.slice(-2));
+                var currentPosition = fakeBoard.fen();
+                if (n % 2 == 0) {
+                    var currentMove;
+                    if (n == 0 && $('.moveTurn:checked').val() === 'b') {
+                        currentMove = n / 2 + 1 + '... ';
+                    } else {
+                        currentMove = n / 2 + 1 + '. ';
+                    }
+                    cell.append($(' <b>' + currentMove + '</b>'));
+                }
+                $('<a class="move" href="#">' + move + ' </a>')
+                    .appendTo(cell)
+                    .click(function() { makeMove(currentPosition, this); });
+            })(i);
         }
 
         var row = $('<tr/>')
