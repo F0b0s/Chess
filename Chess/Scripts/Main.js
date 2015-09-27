@@ -28,8 +28,7 @@ function initializeBoard() {
     $('#fen').val(cfg.position);
 }
 
-function createFenString() {
-    var positionFen = board.fen();
+function createFenString(positionFen) {
     var moveTurn = $('.moveTurn:checked').val();
     var fen = positionFen + ' ' + moveTurn + ' ';
     if ($('#w00').prop('checked'))  {
@@ -53,12 +52,13 @@ function createFenString() {
 }
 
 function moveTurnChanged() {
-    var fenString = createFenString();
+    var fen = ChessBoard.objToFen(board.fen());
+    var fenString = createFenString(fen);
     $('#fen').val(fenString);
 }
 
-function onPositionChange() {
-    var fenString = createFenString();
+function onPositionChange(oldPos, newPos) {
+    var fenString = createFenString(ChessBoard.objToFen(newPos));
     $('#fen').val(fenString);
 }
 
