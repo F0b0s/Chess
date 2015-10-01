@@ -132,21 +132,11 @@ function processAnalysisMove(game, move) {
     var from = move.slice(0, 2);
     var to = move.slice(-2);
     
-    var piece = '';
-    if (game.get(from).type != 'p') {
-        piece = game.get(from).type.toUpperCase();
-    }
-
-    var moveType = '';
-    if (game.get(to) != null) {
-        moveType = 'x';
-    }
-
-    game.move({ from: from, to: to });
+    var moveInfo = game.move({ from: from, to: to });
 
     return {
         fen: game.fen(),
-        description: piece + moveType + to
+        description: moveInfo.san
     }
 }
 
