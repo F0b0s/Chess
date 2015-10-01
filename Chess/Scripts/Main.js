@@ -77,10 +77,6 @@ function handleEngineAnalysis(analysisContainer) {
         clearInterval(timerId);
     }
 
-    var cfg = {
-        position: board.fen()
-    };
-
     $('#engineOutput').show();
     $('#analysisSettings').hide();
 
@@ -91,18 +87,18 @@ function handleEngineAnalysis(analysisContainer) {
     var lines = analysisContainer.PositionAnalysis.Lines;
     for (var j = 0; j < lines.length; j++) {
         var cell = $('<td/>');
-        var fakeBoard = new ChessBoard('fakeBoard', cfg);
+
+        var initialPosition = $('#fen').val();
+        var game = new Chess(initialPosition);
         var lineInfo = lines[j];
 
         var moves = lineInfo.Moves.split(' ');
-        var initialPosition = board.fen();
+        
         $('<a class="move" hidden="true" href="#"></a>').appendTo(cell).click(function () { makeMove(initialPosition, this); });
         
         for (var i = 0; i < moves.length; i++) {
-            (function(n) {
-                var move = moves[n];
-                fakeBoard.move(move.slice(0, 2) + '-' + move.slice(-2));
-                var currentPosition = fakeBoard.fen();
+            (function (n) {
+                var processedMove = processAnalysisMove(game, moves[n]);
                 if (n % 2 == 0) {
                     var currentMove;
                     if (n == 0 && $('.moveTurn:checked').val() === 'b') {
@@ -112,9 +108,9 @@ function handleEngineAnalysis(analysisContainer) {
                     }
                     cell.append($(' <b>' + currentMove + '</b>'));
                 }
-                $('<a class="move" href="#">' + move + ' </a>')
+                $('<a class="move" href="#">' + processedMove.description + ' </a>')
                     .appendTo(cell)
-                    .click(function() { makeMove(currentPosition, this); });
+                    .click(function () { makeMove(processedMove.fen, this); });
             })(i);
         }
 
@@ -132,12 +128,29 @@ function handleEngineAnalysis(analysisContainer) {
     $('#startNewAnalysisBtn').show();
 }
 
-function analyze() {
-    if (board.fen() == '8/8/8/8/8/8/8/8') {
-        alert('Set position for analysis!');
-        return;
+function processAnalysisMove(game, move) {
+    var from = move.slice(0, 2);
+    var to = move.slice(-2);
+    
+    var piece = '';
+    if (game.get(from).type != 'p') {
+        piece = game.get(from).type.toUpperCase();
     }
 
+    var moveType = '';
+    if (game.get(to) != null) {
+        moveType = 'x';
+    }
+
+    game.move({ from: from, to: to });
+
+    return {
+        fen: game.fen(),
+        description: piece + moveType + to
+    }
+}
+
+function analyze() {
     $('#positionNavigation').hide();
     
     var data = {
