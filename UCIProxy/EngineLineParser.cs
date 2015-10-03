@@ -6,7 +6,7 @@ namespace UCIProxy
     class EngineLineParser
     {
         readonly Regex _depthRegex = new Regex("depth (\\d+)");
-        readonly Regex _scoreRegex = new Regex("cp (\\d+)");
+        readonly Regex _scoreRegex = new Regex("cp ([-]?\\d+)");
         readonly Regex _nodesRegex = new Regex("nodes (\\d+)");
         readonly Regex _timeRegex = new Regex("time (\\d+)");
         readonly Regex _multipvRegex = new Regex(" multipv (\\d+)");
@@ -67,7 +67,7 @@ namespace UCIProxy
             return _intermediateLineRegex.IsMatch(engineLine);
         }
 
-        public uint GetMultiPv(string line)
+        public short GetMultiPv(string line)
         {
             var matc = _multipvRegex.Match(line);
             if (!matc.Success)
@@ -76,9 +76,9 @@ namespace UCIProxy
             }
 
             var multipvStr =  matc.Groups[1].Value;
-            uint multipv;
+            short multipv;
 
-            if (uint.TryParse(multipvStr, out multipv))
+            if (short.TryParse(multipvStr, out multipv))
             {
                 return multipv;
             }

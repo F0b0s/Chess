@@ -1,4 +1,4 @@
-﻿var board = null;
+﻿var board;
 var id;
 var timerId;
 
@@ -52,8 +52,7 @@ function createFenString(positionFen) {
 }
 
 function moveTurnChanged() {
-    var fen = ChessBoard.objToFen(board.fen());
-    var fenString = createFenString(fen);
+    var fenString = createFenString(board.fen());
     $('#fen').val(fenString);
 }
 
@@ -64,7 +63,7 @@ function onPositionChange(oldPos, newPos) {
 
 function timer() {
     var data = {
-        guid: id
+        analysisId: id
     }
     $.get('/Home/GetOutput', data)
         .done(handleSuccessSuccess)

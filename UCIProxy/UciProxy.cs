@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using UCIProxy.DAL;
 
 namespace UCIProxy
 {
     public class UciProxy
     {
-        private static readonly object Sync = new object();
-        readonly Dictionary<string, UciItem> _processes = new Dictionary<string, UciItem>();
         private readonly int _maxAnalisysyDepth;
         private readonly int _maxOutputLines;
 
@@ -19,52 +21,54 @@ namespace UCIProxy
             _maxOutputLines = Int32.Parse(ConfigurationManager.AppSettings["MaxOutputLines"]);
         }
 
-        public Guid Start(string fen, int depth, int multiPv)
+        public long Start(string fen, int depth, int multiPv, long engineId)
         {
-            if (depth > _maxAnalisysyDepth || multiPv > _maxOutputLines)
+            if (string.IsNullOrEmpty(fen))
             {
-                throw new ArgumentException("Max thresold overflow");
+                var message = string.Format("FEN string can't be null or empty, current value is '{0}'", fen);
+                throw new ArgumentException(message, "fen");
             }
 
-            try
+            if (depth <= 0 || depth > _maxAnalisysyDepth)
             {
-                var startInfo = new ProcessStartInfo
-                                {
-                                    UseShellExecute = false,
-                                    RedirectStandardInput = true,
-                                    RedirectStandardOutput = true,
-                                    RedirectStandardError = true,
-                                    FileName = ConfigurationManager.AppSettings["EnginePath"]
-                                };
-
-                var process = Process.Start(startInfo);
-
-                var engneInfo = GetEngineInfo(process);
-                PrepareEngine(fen, depth, multiPv, process);
-
-                var guid = Guid.NewGuid();
-                var uciItem = new UciItem(multiPv)
-                              {
-                                  Process = process
-                              };
-                uciItem.Infos.EngneInfo = engneInfo;
-                _processes.Add(guid.ToString(), uciItem);
-                var task = Task.Factory.StartNew(async () =>
-                                                       {
-                                                           await ReadLineAsync(uciItem);
-                                                           if (process != null) 
-                                                                process.Kill();
-                                                       });
-                
-                uciItem.ReaderTask = task;
-
-                return guid;
+                var message = string.Format("Analysis depth should be between {0} and {1}, current value is '{2}'", 1, _maxAnalisysyDepth, depth);
+                throw new ArgumentException(message, "depth");
             }
-            catch (Exception ex)
+
+            if (multiPv <= 0 || multiPv > _maxOutputLines)
             {
-                Debug.WriteLine(ex.ToString());
-                throw;
+                var message = string.Format("Analysis output lines count should be between {0} and {1}, current value is '{2}'", 1, _maxOutputLines, multiPv);
+                throw new ArgumentException(message, "multiPv");
             }
+
+            long analisysId;
+            if (AnalisysRepository.TryGetAnalysis(engineId, fen, depth, multiPv, out analisysId))
+            {
+                return analisysId;
+            }
+
+            var startInfo = new ProcessStartInfo
+                            {
+                                UseShellExecute = false,
+                                RedirectStandardInput = true,
+                                RedirectStandardOutput = true,
+                                RedirectStandardError = true,
+                                FileName = ConfigurationManager.AppSettings["EnginePath"]
+                            };
+
+            var process = Process.Start(startInfo);
+            var engneInfo = GetEngineInfo(process);
+            PrepareEngine(fen, depth, multiPv, process);
+
+            analisysId = AnalisysRepository.CreateAnalisys(engineId, fen);
+
+            Task.Factory.StartNew(async () =>
+                                        {
+                                            await ReadLineAsync(process.StandardOutput, analisysId);
+                                            if (process != null)
+                                                process.Kill();
+                                        });
+            return analisysId;
         }
 
         private void PrepareEngine(string fen, int depth, int multiPv, Process process)
@@ -82,29 +86,39 @@ namespace UCIProxy
             process.StandardInput.WriteLine("go depth {0}", depth);
         }
 
-        public PositionAnalysisContainer GetProcessOutput(Guid guid)
+        public PositionAnalysisContainer GetProcessOutput(long analisysId)
         {
-            UciItem uciItem;
-            if (!_processes.TryGetValue(guid.ToString(), out uciItem))
-            {
-                throw new ArgumentException(string.Format("The process with '{0}' guid was not found", guid), "guid");
-            }
+            var analisys = AnalisysRepository.GetAnalysis(analisysId);
 
             return new PositionAnalysisContainer
                                     {
-                                        PositionAnalysis = uciItem.Infos,
-                                        Completed = uciItem.ReaderTask.Result.IsCompleted
+                                        PositionAnalysis = new PositionAnalysis
+                                                           {
+                                                               Lines = analisys.Lines.Select(x => new LineInfo
+                                                                                                  {
+                                                                                                      Moves = x.Moves,
+                                                                                                      Score = x.Score
+                                                                                                  }).ToArray(),
+                                                               EngneInfo = analisys.Engine.Name,
+                                                               AnalysisStatistics = new AnalysisStatistics
+                                                                                    {
+                                                                                        Depth = analisys.Depth.ToString(CultureInfo.InvariantCulture),
+                                                                                        Nodes = analisys.Nodes.ToString(CultureInfo.InvariantCulture),
+                                                                                        Time = analisys.Time.ToString(CultureInfo.InvariantCulture)
+                                                                                    }
+                                                           },
+                                        Completed = analisys.Completed
                                     };
         }
 
-        private async Task ReadLineAsync(UciItem uciItem)
+        private async Task ReadLineAsync(StreamReader input, long analysisId)
         {
             var parser = new EngineLineParser();
             string line = "";
 
             while (line != null)
             {
-                line = await uciItem.Process.StandardOutput.ReadLineAsync();
+                line = await input.ReadLineAsync();
 
                 Debug.WriteLine(line);
 
@@ -117,13 +131,11 @@ namespace UCIProxy
                 var multiPv = parser.GetMultiPv(line);
                 var lineInfo = parser.GetLineInfo(line);
                 var analysisStatistics = parser.GetAnalysisStatistic(line);
-                
-                lock (Sync)
-                {
-                    uciItem.Infos.Lines[(int) (multiPv - 1)] = lineInfo;
-                    uciItem.Infos.AnalysisStatistics = analysisStatistics;
-                }
+
+                AnalisysRepository.SaveAnalisysLine(analysisId, multiPv, lineInfo, analysisStatistics);
             }
+
+            AnalisysRepository.MarkAnalisysAsCompleted(analysisId);
         }
 
         private string GetEngineInfo(Process process)
@@ -149,7 +161,7 @@ namespace UCIProxy
             while (process.StandardOutput.Peek() != -1)
             {
                 var line = process.StandardOutput.ReadLine();
-                Debug.WriteLine("Discarded line: {0}", line);
+                Debug.WriteLine("Discarded line: {0}", new object[]{line});
             }
         }
     }
