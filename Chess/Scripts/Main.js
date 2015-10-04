@@ -31,21 +31,25 @@ function initializeBoard() {
 function createFenString(positionFen) {
     var moveTurn = $('.moveTurn:checked').val();
     var fen = positionFen + ' ' + moveTurn + ' ';
+
+    var castling = '';
     if ($('#w00').prop('checked'))  {
-        fen += 'K';
+        castling += 'K';
     }
 
     if ($('#w000').prop('checked')) {
-        fen += 'Q';
+        castling += 'Q';
     }
 
     if ($('#b00').prop('checked')) {
-        fen += 'k';
+        castling += 'k';
     }
 
     if ($('#b000').prop('checked')) {
-        fen += 'q';
+        castling += 'q';
     }
+
+    fen += castling == '' ? '-' : castling;
 
     fen += ' - 0 1';
     return fen;
