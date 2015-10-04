@@ -1,5 +1,7 @@
 using System;
+using System.Configuration;
 using Microsoft.Practices.Unity;
+using UCIProxy;
 using UCIProxy.DAL;
 
 namespace Chess.App_Start
@@ -10,7 +12,7 @@ namespace Chess.App_Start
     public class UnityConfig
     {
         #region Unity Container
-        private static Lazy<IUnityContainer> container = new Lazy<IUnityContainer>(() =>
+        private static readonly Lazy<IUnityContainer> Container = new Lazy<IUnityContainer>(() =>
         {
             var container = new UnityContainer();
             RegisterTypes(container);
@@ -22,7 +24,7 @@ namespace Chess.App_Start
         /// </summary>
         public static IUnityContainer GetConfiguredContainer()
         {
-            return container.Value;
+            return Container.Value;
         }
         #endregion
 
@@ -36,7 +38,10 @@ namespace Chess.App_Start
             // container.LoadConfiguration();
 
             container.RegisterType<AnalysisRepository, AnalysisRepository>();
-            container.RegisterType<UCIProxy.UciProxy, UCIProxy.UciProxy>();
+            
+            var maxAnalisysyDepth = Int32.Parse(ConfigurationManager.AppSettings["MaxAnalysisDepth"]);
+            var maxOutputLines = Int32.Parse(ConfigurationManager.AppSettings["MaxOutputLines"]);
+            container.RegisterType<UciProxy, UciProxy>(new InjectionConstructor(new ResolvedParameter<AnalysisRepository>(), maxAnalisysyDepth, maxOutputLines));
         }
     }
 }

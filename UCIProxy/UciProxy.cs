@@ -15,11 +15,11 @@ namespace UCIProxy
         private readonly int _maxAnalisysyDepth;
         private readonly int _maxOutputLines;
 
-        public UciProxy(AnalysisRepository analysisRepository)
+        public UciProxy(AnalysisRepository analysisRepository, int maxAnalisysyDepth, int maxOutputLines)
         {
             _analysisRepository = analysisRepository;
-            _maxAnalisysyDepth = Int32.Parse(ConfigurationManager.AppSettings["MaxAnalysisDepth"]);
-            _maxOutputLines = Int32.Parse(ConfigurationManager.AppSettings["MaxOutputLines"]);
+            _maxAnalisysyDepth = maxAnalisysyDepth;
+            _maxOutputLines = maxOutputLines;
         }
 
         public void Start(string fen, int depth, int multiPv, long engineId, long analysisId)
