@@ -11,11 +11,13 @@ namespace UCIProxy
 {
     public class UciProxy
     {
+        private readonly AnalysisRepository _analysisRepository;
         private readonly int _maxAnalisysyDepth;
         private readonly int _maxOutputLines;
 
-        public UciProxy()
+        public UciProxy(AnalysisRepository analysisRepository)
         {
+            _analysisRepository = analysisRepository;
             _maxAnalisysyDepth = Int32.Parse(ConfigurationManager.AppSettings["MaxAnalysisDepth"]);
             _maxOutputLines = Int32.Parse(ConfigurationManager.AppSettings["MaxOutputLines"]);
         }
@@ -42,11 +44,11 @@ namespace UCIProxy
 
             // combine operations
             long analysisId;
-            if (AnalysisRepository.TryGetAnalysis(engineId, fen, depth, multiPv, out analysisId))
+            if (_analysisRepository.TryGetAnalysis(engineId, fen, depth, multiPv, out analysisId))
             {
                 return analysisId;
             }
-            analysisId = AnalysisRepository.CreateAnalysis(engineId, fen);
+            analysisId = _analysisRepository.CreateAnalysis(engineId, fen);
 
             Task.Factory.StartNew(async () => await AnalysePosition(fen, depth, multiPv, analysisId))
                         .ContinueWith(task => LogHelper.LogError(task.Exception), TaskContinuationOptions.OnlyOnFaulted);
@@ -66,7 +68,7 @@ namespace UCIProxy
             catch (ChessException ce)
             {
                 LogHelper.LogError(ce);
-                AnalysisRepository.SetAnalisysStatus(analysisId, DAL.AnalysisStatus.Faulted);
+                _analysisRepository.SetAnalisysStatus(analysisId, DAL.AnalysisStatus.Faulted);
             }
         }
 
@@ -131,7 +133,7 @@ namespace UCIProxy
             process.StandardInput.WriteLine("go depth {0}", depth);
         }
 
-        private async static Task ReadAnalysis(TextReader input, long analysisId)
+        private async Task ReadAnalysis(TextReader input, long analysisId)
         {
             while (true)
             {
@@ -144,7 +146,7 @@ namespace UCIProxy
 
                 if (EngineLineParser.IsLastLine(line))
                 {
-                    AnalysisRepository.SetAnalisysStatus(analysisId, DAL.AnalysisStatus.Completed);
+                    _analysisRepository.SetAnalisysStatus(analysisId, DAL.AnalysisStatus.Completed);
                     break;
                 }
 
@@ -152,7 +154,7 @@ namespace UCIProxy
             }
         }
 
-        private static void StoreLine(string line, long analysisId)
+        private void StoreLine(string line, long analysisId)
         {
             if (EngineLineParser.IsIntermediateLine(line))
                 return;
@@ -161,7 +163,7 @@ namespace UCIProxy
             var lineInfo = EngineLineParser.GetLineInfo(line);
             var analysisStatistics = EngineLineParser.GetAnalysisStatistic(line);
 
-            AnalysisRepository.SaveAnalisysLine(analysisId, multiPv, lineInfo, analysisStatistics);
+            _analysisRepository.SaveAnalisysLine(analysisId, multiPv, lineInfo, analysisStatistics);
         }
 
         private static async Task<string> ReadLineAsync(TextReader input)

@@ -11,7 +11,14 @@ namespace Chess.Controllers
 {
     public class HomeController : Controller
     {
-        static readonly UciProxy UciProxy = new UciProxy();
+        private readonly AnalysisRepository _analysisRepository;
+        private readonly UciProxy _uciProxy;
+
+        public HomeController(AnalysisRepository analysisRepository, UciProxy uciProxy)
+        {
+            _analysisRepository = analysisRepository;
+            _uciProxy = uciProxy;
+        }
 
         [ExceptionFilter]
         public ActionResult Index()
@@ -22,13 +29,13 @@ namespace Chess.Controllers
         [ExceptionFilter]
         public ActionResult StartAnalyze(string fen, string depth, int outputLines)
         {
-            var analysisId = UciProxy.Start(fen, int.Parse(depth), outputLines, 1);
+            var analysisId = _uciProxy.Start(fen, int.Parse(depth), outputLines, 1);
             return Content(analysisId.ToString(CultureInfo.InvariantCulture));
         }
 
         public ActionResult GetOutput(int analysisId)
         {
-            var analisys = AnalysisRepository.GetAnalysis(analysisId);
+            var analisys = _analysisRepository.GetAnalysis(analysisId);
             var output = new PositionAnalysisContainer
                          {
                              PositionAnalysis = new PositionAnalysis

@@ -5,9 +5,9 @@ using System.Linq;
 
 namespace UCIProxy.DAL
 {
-    public static class AnalysisRepository
+    public class AnalysisRepository
     {
-        public static IEnumerable<Engine> GetEngines()
+        public IEnumerable<Engine> GetEngines()
         {
             using (var context = new PositionAnalysisContext())
             {
@@ -15,7 +15,7 @@ namespace UCIProxy.DAL
             }
         }
 
-        public static bool TryGetAnalysis(long engineId, string fen, int depth, int lines, out long analisysId)
+        public bool TryGetAnalysis(long engineId, string fen, int depth, int lines, out long analisysId)
         {
             using (var context = new PositionAnalysisContext())
             {
@@ -40,7 +40,29 @@ namespace UCIProxy.DAL
             }
         }
 
-        public static PositionAnalysis GetAnalysis(long analysisId)
+        public long CreateAnalysis(long engineId, string fen)
+        {
+            using (var context = new PositionAnalysisContext())
+            {
+                var engine = context.Engines.Single(x => x.Id == engineId);
+                var position = new Position
+                {
+                    Fen = fen
+                };
+                var analisys = new PositionAnalysis
+                {
+                    Engine = engine,
+                    Position = position,
+
+                };
+                context.PositionAnalyses.Add(analisys);
+                context.SaveChanges();
+
+                return analisys.Id;
+            }
+        }
+
+        public PositionAnalysis GetAnalysis(long analysisId)
         {
             using (var context = new PositionAnalysisContext())
             {
@@ -51,29 +73,7 @@ namespace UCIProxy.DAL
             }
         }
 
-        public static long CreateAnalysis(long engineId, string fen)
-        {
-            using (var context = new PositionAnalysisContext())
-            {
-                var engine = context.Engines.Single(x => x.Id == engineId);
-                var position = new Position
-                               {
-                                   Fen = fen
-                               };
-                var analisys = new PositionAnalysis
-                               {
-                                   Engine = engine,
-                                   Position = position,
-
-                               };
-                context.PositionAnalyses.Add(analisys);
-                context.SaveChanges();
-
-                return analisys.Id;
-            }
-        }
-
-        public static void SaveAnalisysLine(long analisysId, short lineNumber, LineInfo lineInfo, AnalysisStatistics analisysStatistics)
+        public void SaveAnalisysLine(long analisysId, short lineNumber, LineInfo lineInfo, AnalysisStatistics analisysStatistics)
         {
             using (var context = new PositionAnalysisContext())
             {
@@ -106,7 +106,7 @@ namespace UCIProxy.DAL
             }
         }
 
-        public static void SetAnalisysStatus(long analysisId, AnalysisStatus status)
+        public void SetAnalisysStatus(long analysisId, AnalysisStatus status)
         {
             using (var context = new PositionAnalysisContext())
             {
