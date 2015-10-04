@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace UCIProxy.DAL
 {
-    public static class AnalisysRepository
+    public static class AnalysisRepository
     {
         public static IEnumerable<Engine> GetEngines()
         {
@@ -51,7 +51,7 @@ namespace UCIProxy.DAL
             }
         }
 
-        public static long CreateAnalisys(long engineId, string fen)
+        public static long CreateAnalysis(long engineId, string fen)
         {
             using (var context = new PositionAnalysisContext())
             {
@@ -115,6 +115,11 @@ namespace UCIProxy.DAL
 
                 context.SaveChanges();
             }
+        }
+
+        public static void MarkAnalisysAsFailed()
+        {
+            throw new NotImplementedException();
         }
     }
 }

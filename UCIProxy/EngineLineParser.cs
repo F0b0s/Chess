@@ -3,33 +3,33 @@ using System.Text.RegularExpressions;
 
 namespace UCIProxy
 {
-    class EngineLineParser
+    static class EngineLineParser
     {
-        readonly Regex _depthRegex = new Regex("depth (\\d+)");
-        readonly Regex _scoreRegex = new Regex("cp ([-]?\\d+)");
-        readonly Regex _nodesRegex = new Regex("nodes (\\d+)");
-        readonly Regex _timeRegex = new Regex("time (\\d+)");
-        readonly Regex _multipvRegex = new Regex(" multipv (\\d+)");
-        readonly Regex _movesRegex = new Regex(" pv ([\\s\\S]+)");
-        readonly Regex _endLineRegex = new Regex("^bestmove");
-        readonly Regex _intermediateLineRegex = new Regex("currmove");
+        static readonly Regex DepthRegex = new Regex("depth (\\d+)");
+        static readonly Regex ScoreRegex = new Regex("cp ([-]?\\d+)");
+        static readonly Regex NodesRegex = new Regex("nodes (\\d+)");
+        static readonly Regex TimeRegex = new Regex("time (\\d+)");
+        static readonly Regex MultipvRegex = new Regex(" multipv (\\d+)");
+        static readonly Regex MovesRegex = new Regex(" pv ([\\s\\S]+)");
+        static readonly Regex EndLineRegex = new Regex("^bestmove");
+        static readonly Regex IntermediateLineRegex = new Regex("currmove");
 
-        public AnalysisStatistics GetAnalysisStatistic(string engineLine)
+        public static AnalysisStatistics GetAnalysisStatistic(string engineLine)
         {
             var analysisStatistics = new AnalysisStatistics();
-            var match = _depthRegex.Match(engineLine);
+            var match = DepthRegex.Match(engineLine);
             if (match.Success)
             {
                 analysisStatistics.Depth = match.Groups[1].Value;
             }
 
-            match = _nodesRegex.Match(engineLine);
+            match = NodesRegex.Match(engineLine);
             if (match.Success)
             {
                 analysisStatistics.Nodes = match.Groups[1].Value;
             }
 
-            match = _timeRegex.Match(engineLine);
+            match = TimeRegex.Match(engineLine);
             if (match.Success)
             {
                 analysisStatistics.Time = match.Groups[1].Value;
@@ -38,17 +38,17 @@ namespace UCIProxy
             return analysisStatistics;
         }
 
-        public LineInfo GetLineInfo(string engineLine)
+        public static LineInfo GetLineInfo(string engineLine)
         {
             var lineInfo = new LineInfo();
 
-            var match = _scoreRegex.Match(engineLine);
+            var match = ScoreRegex.Match(engineLine);
             if (match.Success)
             {
                 lineInfo.Score = match.Groups[1].Value;
             }
 
-            match = _movesRegex.Match(engineLine);
+            match = MovesRegex.Match(engineLine);
             if (match.Success)
             {
                 lineInfo.Moves = match.Groups[1].Value;
@@ -57,19 +57,19 @@ namespace UCIProxy
             return lineInfo;
         }
 
-        public bool IsEndLIne(string engineLine)
+        public static bool IsLastLine(string engineLine)
         {
-            return _endLineRegex.IsMatch(engineLine);
+            return EndLineRegex.IsMatch(engineLine);
         }
 
-        public bool IsIntermediateLine(string engineLine)
+        public static bool IsIntermediateLine(string engineLine)
         {
-            return _intermediateLineRegex.IsMatch(engineLine);
+            return IntermediateLineRegex.IsMatch(engineLine);
         }
 
-        public short GetMultiPv(string line)
+        public static short GetMultiPv(string line)
         {
-            var matc = _multipvRegex.Match(line);
+            var matc = MultipvRegex.Match(line);
             if (!matc.Success)
             {
                 throw new ArgumentException(string.Format("Should contain multipv info '{0}'", line));

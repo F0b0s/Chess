@@ -1,7 +1,10 @@
 ﻿using System.Globalization;
+using System.Linq;
 using System.Web.Mvc;
 using Chess.Filters;
 using UCIProxy;
+using UCIProxy.DAL;
+using PositionAnalysis = UCIProxy.PositionAnalysis;
 
 namespace Chess.Controllers
 {
@@ -24,7 +27,26 @@ namespace Chess.Controllers
 
         public ActionResult GetOutput(int analysisId)
         {
-            var output = UciProxy.GetProcessOutput(analysisId);
+            var analisys = AnalysisRepository.GetAnalysis(analysisId);
+            var output = new PositionAnalysisContainer
+                         {
+                             PositionAnalysis = new PositionAnalysis
+                                                {
+                                                    Lines = analisys.Lines.Select(x => new LineInfo
+                                                                                       {
+                                                                                           Moves = x.Moves,
+                                                                                           Score = x.Score
+                                                                                       }).ToArray(),
+                                                    EngneInfo = analisys.Engine.Name,
+                                                    AnalysisStatistics = new AnalysisStatistics
+                                                                         {
+                                                                             Depth = analisys.Depth.ToString(CultureInfo.InvariantCulture),
+                                                                             Nodes = analisys.Nodes.ToString(CultureInfo.InvariantCulture),
+                                                                             Time = analisys.Time.ToString(CultureInfo.InvariantCulture)
+                                                                         }
+                                                },
+                             Completed = analisys.Completed
+                         };
 
             return Json(output, JsonRequestBehavior.AllowGet);
         }

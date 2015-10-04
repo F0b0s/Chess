@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
+using UCIProxy.Common;
 using UCIProxy.DAL;
 
 namespace UCIProxy
@@ -41,12 +40,38 @@ namespace UCIProxy
                 throw new ArgumentException(message, "multiPv");
             }
 
-            long analisysId;
-            if (AnalisysRepository.TryGetAnalysis(engineId, fen, depth, multiPv, out analisysId))
+            // combine operations
+            long analysisId;
+            if (AnalysisRepository.TryGetAnalysis(engineId, fen, depth, multiPv, out analysisId))
             {
-                return analisysId;
+                return analysisId;
             }
+            analysisId = AnalysisRepository.CreateAnalysis(engineId, fen);
 
+            Task.Factory.StartNew(() => AnalysePosition(fen, depth, multiPv, analysisId))
+                        .ContinueWith(task => LogHelper.LogError(task.Exception), TaskContinuationOptions.OnlyOnFaulted);
+            
+            return analysisId;
+        }
+
+        private void AnalysePosition(string fen, int depth, int multiPv, long analysisId)
+        {
+            try
+            {
+                var process = StartAnalysisProcess();
+                PrepareEngine(fen, depth, multiPv, process);
+                ReadAnalysis(process.StandardOutput, analysisId)
+                    .ContinueWith(task => CloseAnalysisProcess(process));
+            }
+            catch (ChessException ce)
+            {
+                LogHelper.LogError(ce);
+                AnalysisRepository.MarkAnalisysAsFailed();
+            }
+        }
+
+        private static Process StartAnalysisProcess()
+        {
             var startInfo = new ProcessStartInfo
                             {
                                 UseShellExecute = false,
@@ -56,19 +81,39 @@ namespace UCIProxy
                                 FileName = ConfigurationManager.AppSettings["EnginePath"]
                             };
 
-            var process = Process.Start(startInfo);
-            var engneInfo = GetEngineInfo(process);
-            PrepareEngine(fen, depth, multiPv, process);
+            try
+            {
+                return Process.Start(startInfo);
+            }
+            catch (InvalidOperationException ioe)
+            {
+                throw new ChessException("Unable to start analysis process", ioe);
+            }
+            catch (FileNotFoundException fnfe)
+            {
+                throw new ChessException("Unable to start analysis process", fnfe);
+            }
+            catch (Win32Exception w32e)
+            {
+                throw new ChessException("Unable to start analysis process", w32e);
+            }
+        }
 
-            analisysId = AnalisysRepository.CreateAnalisys(engineId, fen);
-
-            Task.Factory.StartNew(async () =>
-                                        {
-                                            await ReadLineAsync(process.StandardOutput, analisysId);
-                                            if (process != null)
-                                                process.Kill();
-                                        });
-            return analisysId;
+        private void CloseAnalysisProcess(Process analysisProcess)
+        {
+            try
+            {
+                Debug.WriteLine("Kill process");
+                analysisProcess.Kill();
+            }
+            catch (Win32Exception w32e)
+            {
+                LogHelper.LogError(w32e);
+            }
+            catch (InvalidOperationException ioe)
+            {
+                LogHelper.LogError(ioe);
+            }
         }
 
         private void PrepareEngine(string fen, int depth, int multiPv, Process process)
@@ -78,7 +123,7 @@ namespace UCIProxy
             var isReady = process.StandardOutput.ReadLine();
             if (isReady != "readyok")
             {
-                throw new InvalidOperationException("Engine is not ready.");
+                throw new ChessException("Engine is not ready.");
             }
 
             process.StandardInput.WriteLine("setoption name Multipv value " + multiPv);
@@ -86,74 +131,62 @@ namespace UCIProxy
             process.StandardInput.WriteLine("go depth {0}", depth);
         }
 
-        public PositionAnalysisContainer GetProcessOutput(long analisysId)
+        private async static Task ReadAnalysis(TextReader input, long analysisId)
         {
-            var analisys = AnalisysRepository.GetAnalysis(analisysId);
-
-            return new PositionAnalysisContainer
-                                    {
-                                        PositionAnalysis = new PositionAnalysis
-                                                           {
-                                                               Lines = analisys.Lines.Select(x => new LineInfo
-                                                                                                  {
-                                                                                                      Moves = x.Moves,
-                                                                                                      Score = x.Score
-                                                                                                  }).ToArray(),
-                                                               EngneInfo = analisys.Engine.Name,
-                                                               AnalysisStatistics = new AnalysisStatistics
-                                                                                    {
-                                                                                        Depth = analisys.Depth.ToString(CultureInfo.InvariantCulture),
-                                                                                        Nodes = analisys.Nodes.ToString(CultureInfo.InvariantCulture),
-                                                                                        Time = analisys.Time.ToString(CultureInfo.InvariantCulture)
-                                                                                    }
-                                                           },
-                                        Completed = analisys.Completed
-                                    };
-        }
-
-        private async Task ReadLineAsync(StreamReader input, long analysisId)
-        {
-            var parser = new EngineLineParser();
-            string line = "";
-
-            while (line != null)
-            {
-                line = await input.ReadLineAsync();
-
-                Debug.WriteLine(line);
-
-                if (parser.IsIntermediateLine(line))
-                    continue;
-
-                if (parser.IsEndLIne(line))
-                    break;
-
-                var multiPv = parser.GetMultiPv(line);
-                var lineInfo = parser.GetLineInfo(line);
-                var analysisStatistics = parser.GetAnalysisStatistic(line);
-
-                AnalisysRepository.SaveAnalisysLine(analysisId, multiPv, lineInfo, analysisStatistics);
-            }
-
-            AnalisysRepository.MarkAnalisysAsCompleted(analysisId);
-        }
-
-        private string GetEngineInfo(Process process)
-        {
-            ClearProcessOutput(process);
-            process.StandardInput.WriteLine("uci");
-            string engineName;
-            var parser = new EngineInfoParser();
-
             while (true)
             {
-                string line = process.StandardOutput.ReadLine();
+                var line =  await ReadLineAsync(input);
+                if (line == null)
+                {
+                    Debug.WriteLine("Unexpected process termination");
+                    throw new ChessException("Unable to start analysis process");
+                }
 
-                if (parser.TryGetEngineName(line, out engineName) || line == "uciok")
+                if (EngineLineParser.IsLastLine(line))
+                {
+                    AnalysisRepository.MarkAnalisysAsCompleted(analysisId);
                     break;
-            }
+                }
 
-            return engineName;
+                StoreLine(line, analysisId);
+            }
+        }
+
+        private static void StoreLine(string line, long analysisId)
+        {
+            if (EngineLineParser.IsIntermediateLine(line))
+                return;
+
+            var multiPv = EngineLineParser.GetMultiPv(line);
+            var lineInfo = EngineLineParser.GetLineInfo(line);
+            var analysisStatistics = EngineLineParser.GetAnalysisStatistic(line);
+
+            AnalysisRepository.SaveAnalisysLine(analysisId, multiPv, lineInfo, analysisStatistics);
+        }
+
+        private static async Task<string> ReadLineAsync(TextReader input)
+        {
+            try
+            {
+                var line = await input.ReadLineAsync().ConfigureAwait(false);
+                Debug.WriteLine(line);
+                return line;
+            }
+            catch (ArgumentOutOfRangeException aofre)
+            {
+                LogHelper.LogError(aofre);
+                return null;
+            }
+            catch (ObjectDisposedException ode)
+            {
+                LogHelper.LogError(ode);
+                return null;
+            }
+            catch (InvalidOperationException ioe)
+            {
+                LogHelper.LogError(ioe);
+                return null;
+            }
         }
 
         private void ClearProcessOutput(Process process)

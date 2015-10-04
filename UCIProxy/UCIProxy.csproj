@@ -54,8 +54,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChessException.cs" />
     <Compile Include="Common\LogHelper.cs" />
-    <Compile Include="DAL\AnalisysRepository.cs" />
+    <Compile Include="DAL\AnalysisRepository.cs" />
     <Compile Include="DAL\Engine.cs" />
     <Compile Include="EngineInfoParser.cs" />
     <Compile Include="EngineLineParser.cs" />
