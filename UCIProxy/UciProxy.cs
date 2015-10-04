@@ -54,19 +54,19 @@ namespace UCIProxy
             return analysisId;
         }
 
-        private void AnalysePosition(string fen, int depth, int multiPv, long analysisId)
+        private async void AnalysePosition(string fen, int depth, int multiPv, long analysisId)
         {
             try
             {
                 var process = StartAnalysisProcess();
                 PrepareEngine(fen, depth, multiPv, process);
-                ReadAnalysis(process.StandardOutput, analysisId)
-                    .ContinueWith(task => CloseAnalysisProcess(process));
+                await ReadAnalysis(process.StandardOutput, analysisId);
+                CloseAnalysisProcess(process);
             }
             catch (ChessException ce)
             {
                 LogHelper.LogError(ce);
-                AnalysisRepository.MarkAnalisysAsFailed();
+                AnalysisRepository.SetAnalisysStatus(analysisId, DAL.AnalysisStatus.Faulted);
             }
         }
 
@@ -139,12 +139,12 @@ namespace UCIProxy
                 if (line == null)
                 {
                     Debug.WriteLine("Unexpected process termination");
-                    throw new ChessException("Unable to start analysis process");
+                    throw new ChessException("Unexpected process termination");
                 }
 
                 if (EngineLineParser.IsLastLine(line))
                 {
-                    AnalysisRepository.MarkAnalisysAsCompleted(analysisId);
+                    AnalysisRepository.SetAnalisysStatus(analysisId, DAL.AnalysisStatus.Completed);
                     break;
                 }
 

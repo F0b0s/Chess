@@ -76,8 +76,12 @@ function timer() {
 }
 
 function handleEngineAnalysis(analysisContainer) {
-    if (analysisContainer.Completed == true) {
+    if (analysisContainer.AnalysisStatus == 1) {
         clearInterval(timerId);
+    }
+
+    if (analysisContainer.AnalysisStatus == 2) {
+        handleServerError();
     }
 
     $('#engineOutput').show();
@@ -183,6 +187,7 @@ function handleServerError() {
     $('.error').empty();
     $('.error').show();
     $('.error').append($('<label/>').text('Error, please, try again.'));
+    $('#engineTable').hide();
 }
 
 function moveLeft() {

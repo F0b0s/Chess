@@ -4,10 +4,18 @@ using System.Runtime.Serialization;
 namespace UCIProxy
 {
     [DataContract]
+    public enum AnalysisStatus
+    {
+        InProcess,
+        Completed,
+        Faulted
+    }
+
+    [DataContract]
     public class PositionAnalysisContainer
     {
         [DataMember]
-        public bool Completed { get; set; }
+        public AnalysisStatus AnalysisStatus { get; set; }
 
         [DataMember]
         public PositionAnalysis PositionAnalysis { get; set; }

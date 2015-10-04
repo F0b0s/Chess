@@ -89,7 +89,7 @@ namespace UCIProxy.DAL
                 }
                 else
                 {
-                    var analisysLine = new AnalisysLine
+                    var analisysLine = new AnalysisLine
                                        {
                                            LineNumber = lineNumber,
                                            Moves = lineInfo.Moves,
@@ -106,20 +106,15 @@ namespace UCIProxy.DAL
             }
         }
 
-        public static void MarkAnalisysAsCompleted(long analysisId)
+        public static void SetAnalisysStatus(long analysisId, AnalysisStatus status)
         {
             using (var context = new PositionAnalysisContext())
             {
                 var analisys = context.PositionAnalyses.Single(x => x.Id == analysisId);
-                analisys.Completed = true;
+                analisys.Status = status;
 
                 context.SaveChanges();
             }
-        }
-
-        public static void MarkAnalisysAsFailed()
-        {
-            throw new NotImplementedException();
         }
     }
 }

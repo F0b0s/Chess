@@ -1,9 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data.Entity;
 
 namespace UCIProxy.DAL
 {
+    public enum AnalysisStatus
+    {
+        InProcess,
+        Completed,
+        Faulted
+    }
+
     public class Engine
     {
         public long Id { get; set; }
@@ -20,7 +26,7 @@ namespace UCIProxy.DAL
         public string Fen { get; set; }
     }
 
-    public class AnalisysLine
+    public class AnalysisLine
     {
         public long Id { get; set; }
 
@@ -41,9 +47,9 @@ namespace UCIProxy.DAL
 
         public short Depth { get; set; }
 
-        public bool Completed { get; set; }
+        public AnalysisStatus Status { get; set; }
 
-        public virtual List<AnalisysLine> Lines { get; set; }
+        public virtual List<AnalysisLine> Lines { get; set; }
 
         public virtual Engine Engine { get; set; }
 
@@ -60,6 +66,6 @@ namespace UCIProxy.DAL
         public DbSet<Engine> Engines { get; set; }
         public DbSet<Position> Positions { get; set; }
         public DbSet<PositionAnalysis> PositionAnalyses { get; set; }
-        public DbSet<AnalisysLine> AnalisysLines { get; set; }
+        public DbSet<AnalysisLine> AnalysisLines { get; set; }
     }
 }

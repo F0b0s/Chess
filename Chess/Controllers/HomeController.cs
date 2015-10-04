@@ -4,6 +4,7 @@ using System.Web.Mvc;
 using Chess.Filters;
 using UCIProxy;
 using UCIProxy.DAL;
+using AnalysisStatus = UCIProxy.AnalysisStatus;
 using PositionAnalysis = UCIProxy.PositionAnalysis;
 
 namespace Chess.Controllers
@@ -45,7 +46,7 @@ namespace Chess.Controllers
                                                                              Time = analisys.Time.ToString(CultureInfo.InvariantCulture)
                                                                          }
                                                 },
-                             Completed = analisys.Completed
+                             AnalysisStatus = (AnalysisStatus) analisys.Status
                          };
 
             return Json(output, JsonRequestBehavior.AllowGet);
