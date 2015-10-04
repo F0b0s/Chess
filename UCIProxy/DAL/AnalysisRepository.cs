@@ -15,7 +15,7 @@ namespace UCIProxy.DAL
             }
         }
 
-        public bool TryGetAnalysis(long engineId, string fen, int depth, int lines, out long analisysId)
+        public long CreateOrGetAnalysis(long engineId, string fen, int depth, int lines, out bool wasCreated)
         {
             using (var context = new PositionAnalysisContext())
             {
@@ -29,35 +29,25 @@ namespace UCIProxy.DAL
 
                 if (analysis != null)
                 {
-                    analisysId = analysis.Id;
-                    return true;
+                    wasCreated = false;
+                    return analysis.Id;
                 }
-                else
-                {
-                    analisysId = 0;
-                    return false;
-                }
-            }
-        }
 
-        public long CreateAnalysis(long engineId, string fen)
-        {
-            using (var context = new PositionAnalysisContext())
-            {
                 var engine = context.Engines.Single(x => x.Id == engineId);
                 var position = new Position
-                {
-                    Fen = fen
-                };
+                               {
+                                   Fen = fen
+                               };
                 var analisys = new PositionAnalysis
-                {
-                    Engine = engine,
-                    Position = position,
+                               {
+                                   Engine = engine,
+                                   Position = position,
 
-                };
+                               };
                 context.PositionAnalyses.Add(analisys);
                 context.SaveChanges();
 
+                wasCreated = true;
                 return analisys.Id;
             }
         }

@@ -153,7 +153,8 @@ function analyze() {
     var data = {
         fen: $('#fen').val(),
         depth: $('#depthSpinner').spinner('value'),
-        outputLines: $('#outputLinesSpinner').val()
+        outputLines: $('#outputLinesSpinner').val(),
+        engineId: '1'
     }
 
     $.get('/Home/StartAnalyze', data)

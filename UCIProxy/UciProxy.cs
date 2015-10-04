@@ -22,7 +22,7 @@ namespace UCIProxy
             _maxOutputLines = Int32.Parse(ConfigurationManager.AppSettings["MaxOutputLines"]);
         }
 
-        public long Start(string fen, int depth, int multiPv, long engineId)
+        public void Start(string fen, int depth, int multiPv, long engineId, long analysisId)
         {
             if (string.IsNullOrEmpty(fen))
             {
@@ -41,19 +41,9 @@ namespace UCIProxy
                 var message = string.Format("Analysis output lines count should be between {0} and {1}, current value is '{2}'", 1, _maxOutputLines, multiPv);
                 throw new ArgumentException(message, "multiPv");
             }
-
-            // combine operations
-            long analysisId;
-            if (_analysisRepository.TryGetAnalysis(engineId, fen, depth, multiPv, out analysisId))
-            {
-                return analysisId;
-            }
-            analysisId = _analysisRepository.CreateAnalysis(engineId, fen);
-
+            
             Task.Factory.StartNew(async () => await AnalysePosition(fen, depth, multiPv, analysisId))
                         .ContinueWith(task => LogHelper.LogError(task.Exception), TaskContinuationOptions.OnlyOnFaulted);
-            
-            return analysisId;
         }
 
         private async Task AnalysePosition(string fen, int depth, int multiPv, long analysisId)

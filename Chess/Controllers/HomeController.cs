@@ -27,9 +27,15 @@ namespace Chess.Controllers
         }
 
         [ExceptionFilter]
-        public ActionResult StartAnalyze(string fen, string depth, int outputLines)
+        public ActionResult StartAnalyze(string fen, string depth, int outputLines, int engineId)
         {
-            var analysisId = _uciProxy.Start(fen, int.Parse(depth), outputLines, 1);
+            bool wasCreated;
+            var analysisId = _analysisRepository.CreateOrGetAnalysis(engineId, fen, int.Parse(depth), outputLines, out wasCreated);
+            if (wasCreated)
+            {
+                _uciProxy.Start(fen, int.Parse(depth), outputLines, 1, analysisId);
+            }
+            
             return Content(analysisId.ToString(CultureInfo.InvariantCulture));
         }
 
