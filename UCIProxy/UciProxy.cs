@@ -48,13 +48,13 @@ namespace UCIProxy
             }
             analysisId = AnalysisRepository.CreateAnalysis(engineId, fen);
 
-            Task.Factory.StartNew(() => AnalysePosition(fen, depth, multiPv, analysisId))
+            Task.Factory.StartNew(async () => await AnalysePosition(fen, depth, multiPv, analysisId))
                         .ContinueWith(task => LogHelper.LogError(task.Exception), TaskContinuationOptions.OnlyOnFaulted);
             
             return analysisId;
         }
 
-        private async void AnalysePosition(string fen, int depth, int multiPv, long analysisId)
+        private async Task AnalysePosition(string fen, int depth, int multiPv, long analysisId)
         {
             try
             {
