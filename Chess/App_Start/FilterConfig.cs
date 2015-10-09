@@ -1,5 +1,7 @@
 ﻿using System.Web;
 using System.Web.Mvc;
+using Chess.Infrastructure.Attributes;
+using Microsoft.AspNet.Identity;
 
 namespace Chess
 {
@@ -8,6 +10,7 @@ namespace Chess
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
             filters.Add(new HandleErrorAttribute());
+            filters.Add(new HostAuthenticationAttribute(DefaultAuthenticationTypes.ExternalCookie));
         }
     }
 }

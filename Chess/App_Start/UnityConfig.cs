@@ -1,5 +1,8 @@
 using System;
 using System.Configuration;
+using Chess.DataAccess;
+using Chess.DataAccess.Contracts;
+using Chess.Domain;
 using Microsoft.Practices.Unity;
 using UCIProxy;
 using UCIProxy.DAL;
@@ -42,6 +45,9 @@ namespace Chess.App_Start
             var maxAnalisysyDepth = Int32.Parse(ConfigurationManager.AppSettings["MaxAnalysisDepth"]);
             var maxOutputLines = Int32.Parse(ConfigurationManager.AppSettings["MaxOutputLines"]);
             container.RegisterType<UciProxy, UciProxy>(new InjectionConstructor(new ResolvedParameter<AnalysisRepository>(), maxAnalisysyDepth, maxOutputLines));
+
+            container.RegisterType<IUsersRepository, UsersRepository>();
+            container.RegisterType<IUserDataAccess, UserDataAccess>();
         }
     }
 }

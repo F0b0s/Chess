@@ -1,4 +1,6 @@
 ﻿@using System
+@using System.Security.Claims
+@using Chess.Providers.OAuth.UriParsers
 <!DOCTYPE html>
 <html>
 <head>
@@ -29,6 +31,26 @@
                 <ul class="nav navbar-nav">
                     <li>@Html.ActionLink("Analysis", "Index", "Home")</li>
                     <li>@Html.ActionLink("About", "About", "Home")</li>
+                    @if(User.Identity.IsAuthenticated){
+                        <li>
+
+                            @{
+                                var identity = User.Identity as ClaimsIdentity;
+                                var avatarUrl = identity.Claims.FirstOrDefault(i => i.Type == OAuthClaimsParser.ClaimTypeAvatarUrl);
+                                var name = identity.Claims.FirstOrDefault(i => i.Type == ClaimTypes.GivenName) ?? identity.Claims.FirstOrDefault(i => i.Type == ClaimTypes.Name);
+                            }
+                            <table>
+                                <tr>
+                                    <td rowspan="2"><img width='48px' height='48px' src='@avatarUrl.Value'></td>
+                                    <td><a href="/Account/User/">@name.Value</a></td>
+                                </tr>
+                                <tr>
+                                    <td align="right"><a href="/Account/Logout">logout</a></td>
+                                </tr>
+                            </table>
+
+                        </li>
+                    }
                 </ul>
             </div>
         </div>
