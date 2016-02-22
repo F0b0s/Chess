@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using Chess.Domain;
 using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.Owin;
 using Microsoft.Owin.Security;
 
@@ -11,7 +8,7 @@ namespace Chess.Providers.OAuth
 {
     public class OwinAuthHelper
     {
-        public static AuthenticationTicket SignIn(IOwinContext owinContext, User user)
+        public static AuthenticationTicket SignIn(IOwinContext owinContext, IdentityUser user)
         {
             var properties = GetProperties(user);
             var claimsIdentity = ClaimsMapper.CreateIdentity(user, DefaultAuthenticationTypes.ApplicationCookie);
@@ -22,14 +19,13 @@ namespace Chess.Providers.OAuth
             return new AuthenticationTicket(claimsIdentity, properties);
         }
 
-        public static AuthenticationProperties GetProperties(User user)
+        public static AuthenticationProperties GetProperties(IdentityUser user)
         {
             var authenticationProperties = new AuthenticationProperties
             {
                 Dictionary =
                 {
-                    {"name", user.LastName != null ? $"{user.LastName} {user.FirstName}" : string.Empty},
-                    {"ava", user.PhotoRec}
+                    {"name", user.UserName}
                 },
                 IsPersistent = true,
                 AllowRefresh = true,

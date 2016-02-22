@@ -1,89 +1,100 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-using Chess.Domain;
 using Chess.Infrastructure;
+using Chess.Models;
 using Chess.Models.Account;
 using Chess.Providers;
 using Chess.Providers.OAuth;
 using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
+using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
-using Microsoft.Owin.Security.OAuth;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace Chess.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly IUsersRepository _usersRepository;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public AccountController(IUsersRepository usersRepository)
+        public AccountController(UserManager<IdentityUser> userManager)
         {
-            _usersRepository = usersRepository;
+            _userManager = userManager;
         }
 
-        // GET: Account
+        [HttpGet]
         public ActionResult Signin()
         {
             return View();
         }
-
+        
         [AllowAnonymous]
+        //[ValidateAntiForgeryToken]
         public ActionResult ExternalLinkLogin(string provider)
         {
-            // Request a redirect to the external login provider to link a login for the current user
-            return new ChallengeResult(provider, Url.Action("GetExternalLogin", new
-            {
-                provider
-            }));
+            var returnUrl = Url.Action("Index", "Home", null);
+            var redirectUrl = Url.Action("ExternalLoginCallback", new { returnUrl });
+            return new ChallengeResult(provider, redirectUrl);
         }
 
         [AllowAnonymous]
-        public async Task<ActionResult> GetExternalLogin(string provider, string error = null)
+        public async Task<ActionResult> ExternalLoginCallback(string returnUrl)
         {
-            if (error != null)
+            var loginInfo = await AuthenticationManager.GetExternalLoginInfoAsync();
+            if (loginInfo == null)
+                return RedirectToAction("Signin");
+
+            IdentitySignin(loginInfo);
+
+            var storedUser = await _userManager.FindByEmailAsync(loginInfo.Email);
+
+            var user = new IdentityUser
+                       {
+                           Email = loginInfo.Email,
+                           UserName = loginInfo.ExternalIdentity.Name
+                       };
+            var result = await _userManager.CreateAsync(user);
+            if (!result.Succeeded)
             {
-                return Redirect(Url.Content("~/") + "#error=" + Uri.EscapeDataString(error));
+                return RedirectToAction("Signin");
             }
 
-            if (!User.Identity.IsAuthenticated)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
-            }
+            return Redirect(returnUrl);
+        }
 
-            var externalLogin = ExternalLoginModel.FromIdentity(User.Identity as ClaimsIdentity);
+        [HttpGet]
+        public ActionResult Logout()
+        {
+            OwinAuthHelper.LogoutInternal(Request.GetOwinContext());
 
-            if (externalLogin == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
-            }
+            return new RedirectResult("/");
+        }
 
-            if (externalLogin.Provider != provider)
-            {
-                Request.GetOwinContext().Authentication.SignOut(
-                    DefaultAuthenticationTypes.ExternalBearer,
-                    OAuthDefaults.AuthenticationType);
-                return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
-            }
-            var user = _usersRepository.GetExternalUserByLogin(externalLogin.Provider, externalLogin.ProviderKey);
-            if (user != null)
-            {
-                OwinAuthHelper.SignIn(Request.GetOwinContext(), user);
-            }
-            else
-            {
-                user = await _usersRepository.CreateExternalUser(externalLogin.ProviderKey, externalLogin.FirstName,
-                    externalLogin.LastName, externalLogin.AvatarUrl, externalLogin.Provider, externalLogin.Email);
-                OwinAuthHelper.SignIn(Request.GetOwinContext(), user);
-            }
+        private void IdentitySignin(ExternalLoginInfo loginInfo)
+        {
+            var identity = new ClaimsIdentity(loginInfo.ExternalIdentity.Claims, DefaultAuthenticationTypes.ApplicationCookie);
 
-            return Redirect("/");
+            AuthenticationManager.SignIn(new AuthenticationProperties
+                                         {
+                                             AllowRefresh = true,
+                                             IsPersistent = false,
+                                             ExpiresUtc = DateTime.UtcNow.AddDays(7)
+                                         }, identity);
+        }
+
+        public void IdentitySignout()
+        {
+            AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie,
+                                            DefaultAuthenticationTypes.ExternalCookie);
+        }
+
+        private IAuthenticationManager AuthenticationManager
+        {
+            get { return HttpContext.GetOwinContext().Authentication; }
         }
 
         public string GetExternalLogins(string returnUrl, bool generateState = false)
@@ -113,8 +124,8 @@ namespace Chess.Controllers
                     {
                         provider = description.AuthenticationType,
                         response_type = "token",
-                        client_id = Startup.PublicClientId,
-                        redirect_uri = Url.Action("GetExternalLogin","Account"),
+                        client_id = "self",
+                        //redirect_uri = Url.Action("GetExternalLogin", "Account"),
                         state
                     }),
                     State = state
@@ -124,14 +135,6 @@ namespace Chess.Controllers
             }
 
             return JsonConvert.SerializeObject(providers);
-        }
-
-        [HttpGet]
-        public ActionResult Logout()
-        {
-            OwinAuthHelper.LogoutInternal(Request.GetOwinContext());
-
-            return new RedirectResult("/");
         }
     }
 }

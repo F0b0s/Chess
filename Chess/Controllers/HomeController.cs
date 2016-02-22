@@ -9,6 +9,7 @@ using PositionAnalysis = UCIProxy.PositionAnalysis;
 
 namespace Chess.Controllers
 {
+    [RequireHttps]
     public class HomeController : Controller
     {
         private readonly AnalysisRepository _analysisRepository;

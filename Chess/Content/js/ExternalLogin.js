@@ -5,7 +5,7 @@
 }
 
 function getExternalProvidersListCallback(data) {
-    var extProviders = $('#extProviders');
+    var extProviders = $("#extProviders");
 
     //External Providers auth
     $.each(data, function (key, value) {
@@ -40,7 +40,7 @@ function extAuth(id) {
 /* Authenticate a user via PASSWORD */
 function byPassAuth() {
     resetToken();
-    $('#info').hide();
+    $("#info").hide();
 
     //Method requests a new token for a registered user
 

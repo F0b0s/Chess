@@ -5,45 +5,32 @@ using Microsoft.Owin;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.Google;
-using Microsoft.Owin.Security.OAuth;
 using Owin;
 
 namespace Chess
 {
     public partial class Startup
     {
-        static Startup ()
-        {
-            PublicClientId = "self";
-        }
-
-        public static string PublicClientId { get; }
-
         public void ConfigureAuth(IAppBuilder app)
         {
-            // Enable the application to use a cookie to store information for the signed in user
-            //app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);
-
             app.UseCookieAuthentication(new CookieAuthenticationOptions
-            {
-                ExpireTimeSpan = TimeSpan.FromMinutes(30),
-                AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie,
-                LoginPath = new PathString("/Account/Signin"),
-                AuthenticationMode = AuthenticationMode.Active
-            });
+                                        {
+                                            ExpireTimeSpan = TimeSpan.FromMinutes(30),
+                                            AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie,
+                                            LoginPath = new PathString("/Account/Signin"),
+                                            AuthenticationMode = AuthenticationMode.Active
+                                        });
             app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);
-
-            // Use a cookie to temporarily store information about a user logging in with a third party login provider
-            //EnableFacebookAuth(app);
             EnableGoogleAuth(app);
-            //EnableVk(app);
         }
 
-        private void EnableGoogleAuth(IAppBuilder app)
+        private static void EnableGoogleAuth(IAppBuilder app)
         {
-            var authOptions = new GoogleOAuth2AuthenticationOptions();
-            authOptions.ClientId = "996683506861-7bc0h31boqbqjnrr1j9gj2d60uovbevu.apps.googleusercontent.com";
-            authOptions.ClientSecret = "KG2GOvHFVDKegb9Lz-MYlITb";
+            var authOptions = new GoogleOAuth2AuthenticationOptions
+                              {
+                                  ClientId = "1057175655112-0n7cnhcnak2rfpdm9j8bd4aethe8bpaf.apps.googleusercontent.com",
+                                  ClientSecret = "YKb5Bk-2R0ga0V1E6v7UX6DY"
+                              };
             authOptions.Scope.Add("email");
             authOptions.Provider = new GoogleOAuthProvider();
 

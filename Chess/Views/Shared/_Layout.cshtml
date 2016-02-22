@@ -10,8 +10,8 @@
     <title>@ViewBag.Title</title>
     @Styles.Render("~/Content/css")
     
-    <script src="http://code.jquery.com/jquery-2.1.4.js"></script>
-    <script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script src="https://code.jquery.com/jquery-2.1.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     @Scripts.Render("~/bundles/modernizr")
     @Scripts.Render("~/bundles/bootstrap")
 
@@ -37,7 +37,7 @@
                             @{
                                 var identity = User.Identity as ClaimsIdentity;
                                 var avatarUrl = identity.Claims.FirstOrDefault(i => i.Type == OAuthClaimsParser.ClaimTypeAvatarUrl);
-                                var name = identity.Claims.FirstOrDefault(i => i.Type == ClaimTypes.GivenName) ?? identity.Claims.FirstOrDefault(i => i.Type == ClaimTypes.Name);
+                                var name = identity.Claims.FirstOrDefault(i => i.Type == ClaimTypes.Name) ?? identity.Claims.FirstOrDefault(i => i.Type == ClaimTypes.Name);
                             }
                             <table>
                                 <tr>

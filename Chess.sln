@@ -1,23 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess", "Chess\Chess.csproj", "{01595EBA-91D7-46CC-B82C-3378D74008EA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UCIProxy", "UCIProxy\UCIProxy.csproj", "{A9315CF2-4061-4954-A1E8-7E9F7BCB0345}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{6DBB2417-6737-4AD0-9A7D-C97FDF3AA87D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess.Domain", "Chess.Domain\Chess.Domain.csproj", "{8274F214-0CC9-4935-98EF-73EC11B2A7F3}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataAccess", "DataAccess", "{37E307EA-72C6-43CE-A470-4A0155860C77}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess.Data", "Chess.Data\Chess.Data.csproj", "{8E6931D7-4281-4DE1-BF5A-1477BF9F1B2B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess.DataAccess.Contracts", "Chess.DataAccess.Contracts\Chess.DataAccess.Contracts.csproj", "{22D39F4F-5613-45EA-8FF2-B3D1A0FD80D0}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess.DataAccess", "Chess.DataAccess\Chess.DataAccess.csproj", "{B295EC3E-9B60-4F55-AE75-DE3E5AC22A6D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,29 +27,8 @@ Global
 		{6DBB2417-6737-4AD0-9A7D-C97FDF3AA87D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6DBB2417-6737-4AD0-9A7D-C97FDF3AA87D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6DBB2417-6737-4AD0-9A7D-C97FDF3AA87D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8274F214-0CC9-4935-98EF-73EC11B2A7F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8274F214-0CC9-4935-98EF-73EC11B2A7F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8274F214-0CC9-4935-98EF-73EC11B2A7F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8274F214-0CC9-4935-98EF-73EC11B2A7F3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8E6931D7-4281-4DE1-BF5A-1477BF9F1B2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8E6931D7-4281-4DE1-BF5A-1477BF9F1B2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8E6931D7-4281-4DE1-BF5A-1477BF9F1B2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8E6931D7-4281-4DE1-BF5A-1477BF9F1B2B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{22D39F4F-5613-45EA-8FF2-B3D1A0FD80D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{22D39F4F-5613-45EA-8FF2-B3D1A0FD80D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{22D39F4F-5613-45EA-8FF2-B3D1A0FD80D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{22D39F4F-5613-45EA-8FF2-B3D1A0FD80D0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B295EC3E-9B60-4F55-AE75-DE3E5AC22A6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B295EC3E-9B60-4F55-AE75-DE3E5AC22A6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B295EC3E-9B60-4F55-AE75-DE3E5AC22A6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B295EC3E-9B60-4F55-AE75-DE3E5AC22A6D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{8E6931D7-4281-4DE1-BF5A-1477BF9F1B2B} = {37E307EA-72C6-43CE-A470-4A0155860C77}
-		{22D39F4F-5613-45EA-8FF2-B3D1A0FD80D0} = {37E307EA-72C6-43CE-A470-4A0155860C77}
-		{B295EC3E-9B60-4F55-AE75-DE3E5AC22A6D} = {37E307EA-72C6-43CE-A470-4A0155860C77}
 	EndGlobalSection
 EndGlobal
