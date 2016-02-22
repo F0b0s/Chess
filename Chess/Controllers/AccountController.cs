@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using Chess.Infrastructure;
-using Chess.Models;
 using Chess.Models.Account;
 using Chess.Providers;
 using Chess.Providers.OAuth;
@@ -54,10 +53,11 @@ namespace Chess.Controllers
             if (storedUser == null)
             {
                 var user = new IdentityUser
-                {
-                    Email = loginInfo.Email,
-                    UserName = loginInfo.ExternalIdentity.Name
-                };
+                           {
+                               Email = loginInfo.Email,
+                               UserName = loginInfo.ExternalIdentity.Name
+                           };
+
                 var result = await _userManager.CreateAsync(user);
                 if (!result.Succeeded)
                 {
