@@ -51,16 +51,18 @@ namespace Chess.Controllers
             IdentitySignin(loginInfo);
 
             var storedUser = await _userManager.FindByEmailAsync(loginInfo.Email);
-
-            var user = new IdentityUser
-                       {
-                           Email = loginInfo.Email,
-                           UserName = loginInfo.ExternalIdentity.Name
-                       };
-            var result = await _userManager.CreateAsync(user);
-            if (!result.Succeeded)
+            if (storedUser == null)
             {
-                return RedirectToAction("Signin");
+                var user = new IdentityUser
+                {
+                    Email = loginInfo.Email,
+                    UserName = loginInfo.ExternalIdentity.Name
+                };
+                var result = await _userManager.CreateAsync(user);
+                if (!result.Succeeded)
+                {
+                    return RedirectToAction("Signin");
+                }
             }
 
             return Redirect(returnUrl);

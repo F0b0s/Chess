@@ -31,7 +31,8 @@
                 <ul class="nav navbar-nav">
                     <li>@Html.ActionLink("Analysis", "Index", "Home")</li>
                     <li>@Html.ActionLink("About", "About", "Home")</li>
-                    @if(User.Identity.IsAuthenticated){
+                    @if (User.Identity.IsAuthenticated)
+                    {
                         <li>
 
                             @{
@@ -42,14 +43,15 @@
                             <table>
                                 <tr>
                                     <td rowspan="2"><img width='48px' height='48px' src='@avatarUrl.Value'></td>
-                                    <td><a href="/Account/User/">@name.Value</a></td>
-                                </tr>
-                                <tr>
-                                    <td align="right"><a href="/Account/Logout">logout</a></td>
+                                    <td><li>@name.Value</li></td>
                                 </tr>
                             </table>
-
                         </li>
+                        <li>@Html.ActionLink("Logout", "Logout", "Account")</li>
+                    }
+                    else
+                    {
+                        <li>@Html.ActionLink("Login", "SignIn", "Account")</li>
                     }
                 </ul>
             </div>
