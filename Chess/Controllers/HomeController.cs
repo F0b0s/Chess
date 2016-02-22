@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Web.Mvc;
 using Chess.Filters;
+using Microsoft.AspNet.Identity;
 using UCIProxy;
 using UCIProxy.DAL;
 using AnalysisStatus = UCIProxy.AnalysisStatus;
@@ -31,7 +32,12 @@ namespace Chess.Controllers
         public ActionResult StartAnalyze(string fen, string depth, int outputLines, int engineId)
         {
             bool wasCreated;
-            var analysisId = _analysisRepository.CreateOrGetAnalysis(engineId, fen, int.Parse(depth), outputLines, out wasCreated);
+            string userId = null;
+            if (User.Identity.IsAuthenticated)
+            {
+                userId = User.Identity.GetUserId();
+            }
+            var analysisId = _analysisRepository.CreateOrGetAnalysis(engineId, fen, int.Parse(depth), outputLines, userId, out wasCreated);
             if (wasCreated)
             {
                 _uciProxy.Start(fen, int.Parse(depth), outputLines, 1, analysisId);

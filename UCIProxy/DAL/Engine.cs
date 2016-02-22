@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 
 namespace UCIProxy.DAL
@@ -40,7 +41,7 @@ namespace UCIProxy.DAL
     public class PositionAnalysis
     {
         public long Id { get; set; }
-
+        
         public long Time { get; set; }
 
         public long Nodes { get; set; }
@@ -56,6 +57,13 @@ namespace UCIProxy.DAL
         public virtual Position Position { get; set; }
     }
 
+    public class UserPositionAnalysis
+    {
+        public long Id { get; set; }
+        public string UserId { get; set; }
+        public PositionAnalysis PositionAnalysis { get; set; }
+    }
+
     public class PositionAnalysisContext : DbContext
     {
         public PositionAnalysisContext() : base("ChessDbContext")
@@ -67,5 +75,6 @@ namespace UCIProxy.DAL
         public DbSet<Position> Positions { get; set; }
         public DbSet<PositionAnalysis> PositionAnalyses { get; set; }
         public DbSet<AnalysisLine> AnalysisLines { get; set; }
+        public DbSet<UserPositionAnalysis> UserPositionAnalyses { get; set; }
     }
 }

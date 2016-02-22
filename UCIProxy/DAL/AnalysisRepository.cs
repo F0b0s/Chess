@@ -15,7 +15,7 @@ namespace UCIProxy.DAL
             }
         }
 
-        public long CreateOrGetAnalysis(long engineId, string fen, int depth, int lines, out bool wasCreated)
+        public long CreateOrGetAnalysis(long engineId, string fen, int depth, int lines, string userId, out bool wasCreated)
         {
             using (var context = new PositionAnalysisContext())
             {
@@ -30,6 +30,17 @@ namespace UCIProxy.DAL
                 if (analysis != null)
                 {
                     wasCreated = false;
+                    if (!string.IsNullOrEmpty(userId) && context.UserPositionAnalyses.Count(x => x.PositionAnalysis.Id == analysis.Id && x.UserId == userId) < 1)
+                    {
+                        var userpositionAnalysis = new UserPositionAnalysis
+                                                   {
+                                                       UserId = userId,
+                                                       PositionAnalysis = analysis
+                                                   };
+                        context.UserPositionAnalyses.Add(userpositionAnalysis);
+                        context.SaveChanges();
+                    }
+                    
                     return analysis.Id;
                 }
 
@@ -41,9 +52,17 @@ namespace UCIProxy.DAL
                 var analisys = new PositionAnalysis
                                {
                                    Engine = engine,
-                                   Position = position,
-
+                                   Position = position
                                };
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    var userAnalisys = new UserPositionAnalysis
+                                       {
+                                           UserId = userId,
+                                           PositionAnalysis = analisys
+                                       };
+                    context.UserPositionAnalyses.Add(userAnalisys);
+                }
                 context.PositionAnalyses.Add(analisys);
                 context.SaveChanges();
 
