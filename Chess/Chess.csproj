@@ -193,8 +193,8 @@
     <EmbeddedResource Include="Migrations\201602221845354_InitialCreate.resx">
       <DependentUpon>201602221845354_InitialCreate.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201602222115556_UserPositionAnalysis.resx">
-      <DependentUpon>201602222115556_UserPositionAnalysis.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201602231021468_UserPositionAnalysis.resx">
+      <DependentUpon>201602231021468_UserPositionAnalysis.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -217,9 +217,9 @@
     <Compile Include="Migrations\201602221845354_InitialCreate.Designer.cs">
       <DependentUpon>201602221845354_InitialCreate.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201602222115556_UserPositionAnalysis.cs" />
-    <Compile Include="Migrations\201602222115556_UserPositionAnalysis.Designer.cs">
-      <DependentUpon>201602222115556_UserPositionAnalysis.cs</DependentUpon>
+    <Compile Include="Migrations\201602231021468_UserPositionAnalysis.cs" />
+    <Compile Include="Migrations\201602231021468_UserPositionAnalysis.Designer.cs">
+      <DependentUpon>201602231021468_UserPositionAnalysis.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Account\ExternalLoginProviderModel.cs" />

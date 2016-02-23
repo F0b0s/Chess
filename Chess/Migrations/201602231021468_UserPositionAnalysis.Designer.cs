@@ -13,7 +13,7 @@ namespace Chess.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "201602222115556_UserPositionAnalysis"; }
+            get { return "201602231021468_UserPositionAnalysis"; }
         }
         
         string IMigrationMetadata.Source

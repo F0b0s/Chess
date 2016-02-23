@@ -55,6 +55,8 @@ namespace UCIProxy.DAL
         public virtual Engine Engine { get; set; }
 
         public virtual Position Position { get; set; }
+
+        public virtual List<UserPositionAnalysis> UserPositionAnalyses { get; set; }
     }
 
     public class UserPositionAnalysis
