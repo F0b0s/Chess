@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using Chess.Providers.OAuth;
 using Microsoft.AspNet.Identity;
 using Microsoft.Owin;
@@ -28,9 +29,9 @@ namespace Chess
         {
             var authOptions = new GoogleOAuth2AuthenticationOptions
                               {
-                                  ClientId = "1057175655112-0n7cnhcnak2rfpdm9j8bd4aethe8bpaf.apps.googleusercontent.com",
-                                  ClientSecret = "YKb5Bk-2R0ga0V1E6v7UX6DY"
-                              };
+                                  ClientId = ConfigurationManager.AppSettings["GoogleClientId"],
+                                  ClientSecret = ConfigurationManager.AppSettings["GoogleClientSecret"]
+            };
             authOptions.Scope.Add("email");
             authOptions.Provider = new GoogleOAuthProvider();
 

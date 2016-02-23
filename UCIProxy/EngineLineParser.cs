@@ -72,7 +72,7 @@ namespace UCIProxy
             var matc = MultipvRegex.Match(line);
             if (!matc.Success)
             {
-                throw new ArgumentException(string.Format("Should contain multipv info '{0}'", line));
+                throw new ArgumentException($"Should contain multipv info '{line}'");
             }
 
             var multipvStr =  matc.Groups[1].Value;
@@ -83,7 +83,7 @@ namespace UCIProxy
                 return multipv;
             }
 
-            throw new ArgumentException(string.Format("Can't parse multipv info '{0}'", line));
+            throw new ArgumentException($"Can't parse multipv info '{line}'");
         }
     }
 }
