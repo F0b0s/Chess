@@ -67,6 +67,11 @@ namespace UCIProxy.DAL
 
     public class PositionAnalysisContext : DbContext
     {
+        public PositionAnalysisContext()
+        {
+            
+        }
+
         public PositionAnalysisContext(string connectionString) : base(connectionString)
         {
             
