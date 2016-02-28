@@ -1,8 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Configuration;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using UCIProxy.Common;
 using UCIProxy.DAL;
@@ -26,31 +26,32 @@ namespace UCIProxy
         {
             if (string.IsNullOrEmpty(fen))
             {
-                var message = string.Format("FEN string can't be null or empty, current value is '{0}'", fen);
-                throw new ArgumentException(message, "fen");
+                var message = $"FEN string can't be null or empty, current value is '{fen}'";
+                throw new ArgumentException(message, nameof(fen));
             }
 
             if (depth <= 0 || depth > _maxAnalisysyDepth)
             {
-                var message = string.Format("Analysis depth should be between {0} and {1}, current value is '{2}'", 1, _maxAnalisysyDepth, depth);
-                throw new ArgumentException(message, "depth");
+                var message = $"Analysis depth should be between {1} and {_maxAnalisysyDepth}, current value is '{depth}'";
+                throw new ArgumentException(message, nameof(depth));
             }
 
             if (multiPv <= 0 || multiPv > _maxOutputLines)
             {
-                var message = string.Format("Analysis output lines count should be between {0} and {1}, current value is '{2}'", 1, _maxOutputLines, multiPv);
-                throw new ArgumentException(message, "multiPv");
+                var message = $"Analysis output lines count should be between {1} and {_maxOutputLines}, current value is '{multiPv}'";
+                throw new ArgumentException(message, nameof(multiPv));
             }
             
-            Task.Factory.StartNew(async () => await AnalysePosition(fen, depth, multiPv, analysisId))
+            Task.Factory.StartNew(async () => await AnalysePosition(fen, depth, multiPv, analysisId, engineId))
                         .ContinueWith(task => LogHelper.LogError(task.Exception), TaskContinuationOptions.OnlyOnFaulted);
         }
 
-        private async Task AnalysePosition(string fen, int depth, int multiPv, long analysisId)
+        private async Task AnalysePosition(string fen, int depth, int multiPv, long analysisId, long engineId)
         {
             try
             {
-                var process = StartAnalysisProcess();
+                var engine = _analysisRepository.GetEngines().Single(x => x.Id == engineId);
+                var process = StartAnalysisProcess(engine);
                 PrepareEngine(fen, depth, multiPv, process);
                 await ReadAnalysis(process.StandardOutput, analysisId);
                 CloseAnalysisProcess(process);
@@ -62,7 +63,7 @@ namespace UCIProxy
             }
         }
 
-        private static Process StartAnalysisProcess()
+        private Process StartAnalysisProcess(Engine engine)
         {
             var startInfo = new ProcessStartInfo
                             {
@@ -70,7 +71,7 @@ namespace UCIProxy
                                 RedirectStandardInput = true,
                                 RedirectStandardOutput = true,
                                 RedirectStandardError = true,
-                                FileName = ConfigurationManager.AppSettings["EnginePath"]
+                                FileName = engine.Path
                             };
 
             try
@@ -95,7 +96,6 @@ namespace UCIProxy
         {
             try
             {
-                Debug.WriteLine("Kill process");
                 analysisProcess.Kill();
             }
             catch (Win32Exception w32e)

@@ -7,17 +7,27 @@ namespace UCIProxy.DAL
 {
     public class AnalysisRepository
     {
+        private readonly string _connectionString;
+
+        public AnalysisRepository(string connectionString)
+        {
+            if (string.IsNullOrWhiteSpace(connectionString))
+                throw new ArgumentException("Can't be null or empty.", nameof(connectionString));
+
+            _connectionString = connectionString;
+        }
+
         public IEnumerable<Engine> GetEngines()
         {
-            using (var context = new PositionAnalysisContext())
+            using (var context = new PositionAnalysisContext(_connectionString))
             {
-                return context.Engines;
+                return context.Engines.ToArray();
             }
         }
 
         public long CreateOrGetAnalysis(long engineId, string fen, int depth, int lines, string userId, out bool wasCreated)
         {
-            using (var context = new PositionAnalysisContext())
+            using (var context = new PositionAnalysisContext(_connectionString))
             {
                 var analysis = context.PositionAnalyses
                     .FirstOrDefault(x => 
@@ -73,7 +83,7 @@ namespace UCIProxy.DAL
 
         public PositionAnalysis GetAnalysis(long analysisId)
         {
-            using (var context = new PositionAnalysisContext())
+            using (var context = new PositionAnalysisContext(_connectionString))
             {
                 return context.PositionAnalyses
                     .Include(x => x.Engine)
@@ -84,7 +94,7 @@ namespace UCIProxy.DAL
 
         public void SaveAnalisysLine(long analisysId, short lineNumber, LineInfo lineInfo, AnalysisStatistics analisysStatistics)
         {
-            using (var context = new PositionAnalysisContext())
+            using (var context = new PositionAnalysisContext(_connectionString))
             {
                 var analysis = context.PositionAnalyses
                     .Include(x => x.Lines)
@@ -117,7 +127,7 @@ namespace UCIProxy.DAL
 
         public void SetAnalisysStatus(long analysisId, AnalysisStatus status)
         {
-            using (var context = new PositionAnalysisContext())
+            using (var context = new PositionAnalysisContext(_connectionString))
             {
                 var analisys = context.PositionAnalyses.Single(x => x.Id == analysisId);
                 analisys.Status = status;

@@ -1,7 +1,6 @@
 using System.Linq;
 using System.Web.Mvc;
 using Chess;
-using Chess.App_Start;
 using Microsoft.Practices.Unity.Mvc;
 
 [assembly: WebActivatorEx.PreApplicationStartMethod(typeof(UnityWebActivator), "Start")]
