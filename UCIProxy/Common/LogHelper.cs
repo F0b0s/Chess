@@ -14,7 +14,7 @@ namespace UCIProxy.Common
 
         public static void LogError(Exception exception)
         {
-            Logger.Error(exception, exception.Message);
+            Logger.Error(exception, exception.ToString());
         }
 
         public static void LogError(Exception exception, string message)

@@ -8,7 +8,7 @@ namespace Chess.Migrations
     {
         public Configuration()
         {
-            AutomaticMigrationsEnabled = false;
+            AutomaticMigrationsEnabled = true;
             ContextKey = "UCIProxy.DAL.PositionAnalysisContext";
         }
 
