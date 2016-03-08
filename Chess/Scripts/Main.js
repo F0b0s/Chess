@@ -4,15 +4,108 @@ var timerId;
 
 $(document).ready(function () {
     $("#depthSpinner").spinner();
-    $("#depthSpinner").spinner('value', 1);
+    $("#depthSpinner").spinner("value", 1);
     $("#outputLinesSpinner").spinner();
-    $("#outputLinesSpinner").spinner('value', 1);
+    $("#outputLinesSpinner").spinner("value", 1);
     initializeBoard();
 });
 
+function onAnalysisLineSelected(event) {
+    var initialPosition = event.data.initialPosition;
+    board.position(initialPosition, true);
+
+    var $row = $(event.currentTarget);
+    $row.siblings(".active").removeClass("active");
+    $row.addClass("active");
+    fillMovesAreaWithLineInfo($("#movesArea"), event.data.lineInfo.Moves, initialPosition, "moveNumber", "move");
+}
+
+function fillMovesAreaWithLineInfo(container, lineInfoString, initialPosition, moveNumberClass, moveClass) {
+    var rawMoves = parseRawLineInfo(lineInfoString);
+    var movesInSan = convertRawMovesToSan(rawMoves, initialPosition);
+
+    var isWhiteTurn = $(".moveTurn:checked").val() === "w";
+    var movesInOrder = orderMoves(movesInSan, isWhiteTurn, initialPosition);
+
+    container.empty();
+    for (var i = 0; i < movesInOrder.length; i++) {
+        var move = movesInOrder[i];
+
+        var moveNumber = $("<span/>").addClass(moveNumberClass).text(move.moveNumber);
+        container.append(moveNumber);
+        container.append(createMoveSpan(move.white, moveClass));
+
+        if (move.black !== undefined) {
+            container.append(createMoveSpan(move.black, moveClass));
+        }
+    }
+}
+
+function createMoveSpan(move, spanClass) {
+    var $moveSpan = $("<span/>").addClass(spanClass).text(move.san);
+    $moveSpan.on("click", move, moveClicked);
+    return $moveSpan;
+}
+
+function moveClicked(event) {
+    var $spanMove = $(event.currentTarget);
+    $spanMove.siblings().removeClass("selectedMove");
+    $spanMove.addClass("selectedMove");
+    makeMove(event.data.fen, this);
+}
+
+function orderMoves(movesInSan, isWhiteTurn, initialPosition) {
+    var orderedSanMoves = [];
+    if (!isWhiteTurn) {
+        movesInSan = [createMove("...", initialPosition)].concat(movesInSan);
+    }
+
+    for (var i = 0; i < movesInSan.length; i += 2) {
+        var moveNumber = i / 2 + 1 + ".";
+        var move = { "moveNumber": moveNumber, "white": movesInSan[i], "black": movesInSan[i + 1] };
+        orderedSanMoves.push(move);
+    }
+
+    return orderedSanMoves;
+}
+
+function parseRawLineInfo(lineInfoString) {
+    var moves = [];
+    var movesStrings = lineInfoString.split(" ");
+
+    for (var i = 0; i < movesStrings.length; i++) {
+        var move = movesStrings[i];
+        var from = move.slice(0, 2);
+        var to = move.slice(-2);
+
+        moves.push({ "from": from, "to": to });
+    }
+
+    return moves;
+}
+
+function convertRawMovesToSan(rawMoves, initialPosition) {
+    var game = new Chess(initialPosition);
+    var sanMoves = [];
+
+    console.log("=========================");
+    for (var i = 0; i < rawMoves.length; i++) {
+        var rawMove = rawMoves[i];
+        var moveInfo = game.move({ from: rawMove.from, to: rawMove.to });
+        console.log(rawMove);
+        sanMoves.push(createMove(moveInfo.san, game.fen()));
+    }
+
+    return sanMoves;
+}
+
+function createMove(san, fen) {
+    return { "san": san, "fen": fen };
+}
+
 function makeMove(position, caller) {
-    $('.move').removeClass('currentMove');
-    $(caller).addClass('currentMove');
+    $(".move").removeClass("currentMove");
+    $(caller).addClass("currentMove");
     board.position(position, true);
 }
 
@@ -57,107 +150,74 @@ function createFenString(positionFen) {
 
 function moveTurnChanged() {
     var fenString = createFenString(board.fen());
-    $('#fen').val(fenString);
+    $("#fen").val(fenString);
 }
 
 function onPositionChange(oldPos, newPos) {
     var fenString = createFenString(ChessBoard.objToFen(newPos));
-    $('#fen').val(fenString);
+    $("#fen").val(fenString);
 }
 
 function timer() {
     var data = {
         analysisId: id
     }
-    $.get('/Home/GetOutput', data)
+    $.get("/Home/GetOutput", data)
         .done(handleSuccessSuccess)
         .done(handleEngineAnalysis)
         .fail(handleServerError);
 }
 
 function handleEngineAnalysis(analysisContainer) {
-    if (analysisContainer.AnalysisStatus == 1) {
+    if (analysisContainer.AnalysisStatus === 1) {
         clearInterval(timerId);
     }
 
-    if (analysisContainer.AnalysisStatus == 2) {
+    if (analysisContainer.AnalysisStatus === 2) {
         handleServerError();
     }
 
-    $('#engineOutput').show();
-    $('#analysisSettings').hide();
+    $("#engineOutput").show();
+    $("#analysisSettings").hide();
 
-    var headerRow = $('<tr><td>Evaluation</td><td>Line</td></tr>');
-    $('#engineTable').empty();
-    $('#engineTable').append(headerRow);
-
+    var headerRow = $("<tr class='header'><td>Evaluation</td><td>Line</td></tr>");
+    $("#engineTable").empty();
+    $("#engineTable").append(headerRow);
+    var initialPosition = $("#fen").val();
     var lines = analysisContainer.PositionAnalysis.Lines;
+
     for (var j = 0; j < lines.length; j++) {
-        var cell = $('<td/>');
-
-        var initialPosition = $('#fen').val();
-        var game = new Chess(initialPosition);
+        var cell = $("<td/>");
         var lineInfo = lines[j];
+        fillMovesAreaWithLineInfo(cell, lineInfo.Moves, initialPosition, "moveNumberLine", "moveLine");
 
-        var moves = lineInfo.Moves.split(' ');
-        
-        $('<a class="move" hidden="true" href="#"></a>').appendTo(cell).click(function () { makeMove(initialPosition, this); });
-        
-        for (var i = 0; i < moves.length; i++) {
-            (function (n) {
-                var processedMove = processAnalysisMove(game, moves[n]);
-                if (n % 2 == 0) {
-                    var currentMove;
-                    if (n == 0 && $('.moveTurn:checked').val() === 'b') {
-                        currentMove = n / 2 + 1 + '... ';
-                    } else {
-                        currentMove = n / 2 + 1 + '. ';
-                    }
-                    cell.append($(' <b>' + currentMove + '</b>'));
-                }
-                $('<a class="move" href="#">' + processedMove.description + ' </a>')
-                    .appendTo(cell)
-                    .click(function () { makeMove(processedMove.fen, this); });
-            })(i);
-        }
-
-        var row = $('<tr/>')
-            .append('<td>' + lineInfo.Score / 100 + '</td>')
+        var $row = $("<tr/>")
+            .append("<td>" + lineInfo.Score / 100 + "</td>")
             .append(cell);
-        $('#engineTable').append(row);
+
+        $row.on("click", { lineInfo: lineInfo, initialPosition: $("#fen").val() }, onAnalysisLineSelected);
+        $("#engineTable").append($row);
     }
 
     var info = analysisContainer.PositionAnalysis;
-    var infoRow = '<tr><td colspan="2">' + info.EngneInfo + ', ' + info.AnalysisStatistics.Time / 1000 + ' sec, depth ' + info.AnalysisStatistics.Depth + ', ' + info.AnalysisStatistics.Nodes + ' nodes' + '</td></tr>';
-    $('#engineTable').append(infoRow);
-    makeMove(board.fen(), $('#engineTable').find('a').first());
-    $('#analysisNavigation').show();
-    $('#startNewAnalysisBtn').show();
-}
-
-function processAnalysisMove(game, move) {
-    var from = move.slice(0, 2);
-    var to = move.slice(-2);
-    
-    var moveInfo = game.move({ from: from, to: to });
-
-    return {
-        fen: game.fen(),
-        description: moveInfo.san
-    }
+    var infoRow = "<tr  class='footer'><td colspan='2'>" + info.EngneInfo + ", " + info.AnalysisStatistics.Time / 1000 + " sec, depth " + info.AnalysisStatistics.Depth + ", " + info.AnalysisStatistics.Nodes + " nodes" + "</td></tr>";
+    $("#engineTable").append(infoRow);
+    $("#analysisNavigation").show();
+    $("#startNewAnalysisBtn").show();
+    $(".moveLine").off("click");
 }
 
 function analyze() {
-    $('#positionNavigation').hide();
+    $("#positionNavigation").hide();
     
     var data = {
-        fen: $('#fen').val(),
-        depth: $('#depthSpinner').spinner('value'),
-        outputLines: $('#outputLinesSpinner').val(),
-        engineId: '1'
+        fen: $("#fen").val(),
+        depth: $("#depthSpinner").spinner("value"),
+        outputLines: $("#outputLinesSpinner").val(),
+        engineId: "1"
     }
 
-    $.get('/Home/StartAnalyze', data)
+    $.get("/Home/StartAnalyze", data)
         .done(handleSuccessSuccess)
         .done(startPolling)
         .fail(handleServerError);
@@ -173,11 +233,11 @@ function startPolling(response) {
         onChange: onPositionChange,
     };
 
-    board = new ChessBoard('board', cfg);
+    board = new ChessBoard("board", cfg);
 }
 
 function handleSuccessSuccess() {
-    $('.error').hide();
+    $(".error").hide();
 }
 
 function handleServerError() {
@@ -220,15 +280,16 @@ function clearBoard() {
 }
 
 function changeBoardFen() {
-    board.position($('#fen').val());
+    board.position($("#fen").val());
 }
 
 function startNewAnalysis() {
-    $('#analysisSettings').show();
-    $('#engineTable').empty();
-    $('#startNewAnalysisBtn').hide();
-    $('#positionNavigation').show();
-    $('#analysisNavigation').hide();
+    $("#analysisSettings").show();
+    $("#engineTable").empty();
+    $("#startNewAnalysisBtn").hide();
+    $("#positionNavigation").show();
+    $("#analysisNavigation").hide();
+    $("#movesArea").empty();
 
     board.destroy();
     initializeBoard();

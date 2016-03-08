@@ -43,9 +43,12 @@
         <input type="checkbox" id="b000" onchange="moveTurnChanged()" checked="checked">Black 0-0-0
     </div>
     <div id="engineOutput" hidden="true">
-        <table border="1" id="engineTable" />
+        <table id="engineTable" class="table table-bordered table-condensed">
+        </table>
     </div>
-    <div id="test">
-        <input type="button" id="startNewAnalysisBtn" value="New Analysis" onclick="startNewAnalysis()" hidden="true" />
+    <div>
+        <input type="button" id="startNewAnalysisBtn" value="New Analysis" onclick="startNewAnalysis()" hidden="true"/>
+    </div>
+    <div id="movesArea">
     </div>
 </div>

@@ -31,7 +31,7 @@ namespace Chess
                               {
                                   ClientId = ConfigurationManager.AppSettings["GoogleClientId"],
                                   ClientSecret = ConfigurationManager.AppSettings["GoogleClientSecret"]
-            };
+                              };
             authOptions.Scope.Add("email");
             authOptions.Provider = new GoogleOAuthProvider();
 

@@ -9,6 +9,17 @@
     padding-right: 15px;
 }
 
+#footer
+{
+    width: 100%;
+    background-color: black;
+    height: 30px;
+    position:absolute;
+    bottom: 0;
+    color: GrayText;
+    text-align: left;
+}
+
 /* Set width on the form input elements since they're 100% wide by default */
 /*input,*/
 select,
@@ -50,6 +61,10 @@ input[type="checkbox"].input-validation-error {
     border-style: solid; 
     border-width: 1px; 
     border-color: gray
+}
+
+#engineTable {
+    width: auto
 }
 
 #chessBoard {
@@ -125,4 +140,21 @@ div#extProviders > div:hover > img
 
 #userInfo table td {
     padding: 5px;
+}
+
+/*   Moves styles   */
+.move {
+    cursor: pointer;
+    color: #5bc0de;
+    border: 2px solid transparent;
+}
+
+.moveLine {
+    color: #5bc0de;
+    border: 1px solid transparent;
+}
+
+.selectedMove {
+    border: 2px solid #7A8288;
+    border-radius: 4px
 }
