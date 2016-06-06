@@ -27,7 +27,7 @@ namespace Chess
 
         public static void RegisterTypes(IUnityContainer container)
         {
-            var connectionString = ConfigurationManager.AppSettings["ChessDbContext"];
+            var connectionString = ConfigurationManager.ConnectionStrings["UCIProxy.DAL.PositionAnalysisContext"].ConnectionString;
             container.RegisterType<AnalysisRepository, AnalysisRepository>(new InjectionConstructor(new InjectionParameter(connectionString)));
             
             var maxAnalisysyDepth = Int32.Parse(ConfigurationManager.AppSettings["MaxAnalysisDepth"]);
