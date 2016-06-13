@@ -45,7 +45,7 @@ namespace Chess
                 {
                     var positionAnalysisContext = new ConnectionStringSettings("UCIProxy.DAL.PositionAnalysisContext", connectionString)
                     {
-                        ProviderName = "System.Data.EntityClient"
+                        ProviderName = "System.Data.SqlClient"
                     };
 
                     ConfigurationManager.ConnectionStrings.Remove("UCIProxy.DAL.PositionAnalysisContext");
