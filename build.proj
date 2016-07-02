@@ -4,12 +4,15 @@
          xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
+	<MSBuildCommunityTasksPath>$(MSBuildThisFileDirectory).build\MSBuild.Community.Tasks</MSBuildCommunityTasksPath>
     <OutDir Condition=" '$(OutDir)'=='' ">$(MSBuildThisFileDirectory)bin\</OutDir>
     <Configuration Condition=" '$(Configuration)'=='' ">Release</Configuration>
     <SourceHome Condition=" '$(SourceHome)'=='' ">$(MSBuildThisFileDirectory)</SourceHome>
     <ToolsHome Condition=" '$(ToolsHome)'=='' ">$(MSBuildThisFileDirectory)tools\</ToolsHome>
   </PropertyGroup>
 
+  <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.targets" />
+  
   <ItemGroup>
     <Solution Include="$(SourceHome)*.sln">
       <!--<AdditionalProperties>OutDir=$(OutDir);Configuration=$(Configuration)</AdditionalProperties>-->
@@ -29,11 +32,13 @@
     <MSBuild Targets="Build"
              Projects="@(Solution)" 
 			 Properties="DeployOnBuild=true;PublishProfile=Test.pubxml"/>
+	<unzip ZipFileName="$(MSBuildThisFileDirectory)Output\WebSite\DeployPackage\WebSite.zip" TargetDirectory="$(MSBuildThisFileDirectory)Output\WebSite\AWSPackage" /> 
   </Target>
 
   <Target Name="Rebuild" DependsOnTargets="RestorePackages">
     <MSBuild Targets="Rebuild"
              Projects="@(Solution)" />
+	<unzip ZipFileName="$(MSBuildThisFileDirectory)Output\WebSite\DeployPackage\WebSite.zip" TargetDirectory="$(MSBuildThisFileDirectory)Output\WebSite\AWSPackage" /> 
   </Target>
 
 </Project>
