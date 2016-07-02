@@ -27,7 +27,8 @@
 
   <Target Name="Build" DependsOnTargets="RestorePackages">
     <MSBuild Targets="Build"
-             Projects="@(Solution)" />
+             Projects="@(Solution)" 
+			 Properties="DeployOnBuild=true;PublishProfile=Test.pubxml"/>
   </Target>
 
   <Target Name="Rebuild" DependsOnTargets="RestorePackages">
