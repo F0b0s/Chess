@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess", "Chess\Chess.csproj", "{01595EBA-91D7-46CC-B82C-3378D74008EA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UCIProxy", "UCIProxy\UCIProxy.csproj", "{A9315CF2-4061-4954-A1E8-7E9F7BCB0345}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{6DBB2417-6737-4AD0-9A7D-C97FDF3AA87D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{47A37EC0-BC6D-4E9B-8B84-5DD0E368267A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,5 +32,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{01595EBA-91D7-46CC-B82C-3378D74008EA} = {47A37EC0-BC6D-4E9B-8B84-5DD0E368267A}
+		{A9315CF2-4061-4954-A1E8-7E9F7BCB0345} = {47A37EC0-BC6D-4E9B-8B84-5DD0E368267A}
+		{6DBB2417-6737-4AD0-9A7D-C97FDF3AA87D} = {47A37EC0-BC6D-4E9B-8B84-5DD0E368267A}
 	EndGlobalSection
 EndGlobal
